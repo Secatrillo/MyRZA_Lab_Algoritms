@@ -12,9 +12,12 @@
 class CMV : public GenCommonDataClass, public GenDataObjectClass
 {
 public:
-    ptr<Vector> cVal;
+    std::unique_ptr<Vector> cVal;
     ptr<Quality> q;
     ptr<TimeStamp> t;
     CMV(std::string SubDataObjectName_, bool Presence_, std::string DataObjectRef_);
+
+    void set_cVal(const Vector& vec);
+    Vector& get_cVal();
 };
 

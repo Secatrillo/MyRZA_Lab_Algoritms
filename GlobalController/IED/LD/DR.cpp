@@ -40,11 +40,11 @@ DR::DR(std::string LDName_) : GenLogicalDeviceClass(LDName_),
               &RBDR7, &RBDR8, &RBDR9, &RBDR10, &RBDR11};
 }
 
-void DR::registerData(std::vector<double> SampledValues, std::vector<double> MMXUData, double svTime, bool PTOC1StrGen, bool PTOC1StrPhA, bool PTOC1StrPhB, bool PTOC1StrPhC, bool PTOC1OpGen, bool PTOC2StrGen, bool PTOC2StrPhA, bool PTOC2StrPhB, bool PTOC2StrPhC, bool PTOC2OpGen, bool PTRCTrip)
+void DR::registerData(std::shared_ptr<std::vector<double>> SampledValues, std::vector<double> MMXUData, double svTime, bool PTOC1StrGen, bool PTOC1StrPhA, bool PTOC1StrPhB, bool PTOC1StrPhC, bool PTOC1OpGen, bool PTOC2StrGen, bool PTOC2StrPhA, bool PTOC2StrPhB, bool PTOC2StrPhC, bool PTOC2OpGen, bool PTRCTrip)
 { // Метод регистрации данных
-    RADR1.catchAnalogValue(SampledValues[0], svTime);
-    RADR2.catchAnalogValue(SampledValues[1], svTime);
-    RADR3.catchAnalogValue(SampledValues[2], svTime);
+    RADR1.catchAnalogValue(SampledValues->at(0), svTime);
+    RADR2.catchAnalogValue(SampledValues->at(1), svTime);
+    RADR3.catchAnalogValue(SampledValues->at(2), svTime);
     RADR4.catchAnalogValue(MMXUData[0], svTime);
     RADR5.catchAnalogValue(MMXUData[1], svTime);
     RADR6.catchAnalogValue(MMXUData[2], svTime);

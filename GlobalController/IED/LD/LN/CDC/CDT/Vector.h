@@ -14,8 +14,11 @@ class Vector : public GenDataAttributeClass{
         Vector(std::string DataAttributeName_, EnumFunctionalConstraints FunctionalConstraint_, TriggerOption TrgOp_, std::string DataObjectRef_);
 
         void setMag(double newValue);
-        double getMag();
+        double getMag() const;
+        void setAng(double newValue);
+        double getAng() const;
     private:
         std::unique_ptr<AnalogValue> mag;
+        std::unique_ptr<AnalogValue> ang;
 
 };

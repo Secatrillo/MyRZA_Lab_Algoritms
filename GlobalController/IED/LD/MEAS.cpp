@@ -7,11 +7,16 @@ MEAS::MEAS(std::string LDName_):
 GenLogicalDeviceClass(LDName_),
 LSVS1("LSVS1", "MEAS"),
 MMXU1("MMXU1", "MEAS"),
-Fourier1("Fourier1", "MEAS")
+Fourier1("Fourier1", "MEAS"),
+MSQI1("MSQI1","MSQI")
 {
 }
 
-void MEAS::acceptSV(std::vector<double> sv)
+void MEAS::setFourierMode(bool& isFourier, int& discrit){
+    Fourier1.mode->stVal->setvalue(isFourier);
+}
+
+void MEAS::acceptSV(std::shared_ptr<std::vector<double>> sv)
 { //Метод приёма SV сообщения извне
     LSVS1.acceptIncomingSV(sv);
 }
@@ -26,14 +31,26 @@ void MEAS::sendLSVSDataToMMXU()
 void MEAS::calculateFourier()
 { //Расчёт преобразования Фурье
     Fourier1.recieveSampledValues(MMXU1.currentA->getInstMag(), MMXU1.currentB->getInstMag(), MMXU1.currentC->getInstMag());
-    Fourier1.calculateFourier();
+    
 }
 
 void MEAS::sendFourierDataToMMXU()
 { //Передача выхода фильтра Фурье в логический узел измерений
-    MMXU1.A.phsA->cVal->setMag(Fourier1.fourierA->getMag());
-    MMXU1.A.phsB->cVal->setMag(Fourier1.fourierB->getMag());
-    MMXU1.A.phsC->cVal->setMag(Fourier1.fourierC->getMag());
+    MMXU1.A->phsA->cVal->setMag(Fourier1.fourierA->cVal->getMag());
+    MMXU1.A->phsB->cVal->setMag(Fourier1.fourierB->cVal->getMag());
+    MMXU1.A->phsC->cVal->setMag(Fourier1.fourierC->cVal->getMag());
+}
+
+void MEAS::sendMMXUDataToMSQI()
+{ //Передача выхода фильтра Фурье в логический узел рассчёта последовательностей
+    MSQI1.A->phsA->set_cVal(MMXU1.A->phsA->get_cVal());
+    MMXU1.A->phsB->set_cVal(MMXU1.A->phsB->get_cVal());
+    MMXU1.A->phsC->set_cVal(MMXU1.A->phsC->get_cVal());
+}
+
+void MEAS::calculateSequenses()
+{ //Расчёт Последовательностей
+    MSQI1.Calculate();
 }
 
 

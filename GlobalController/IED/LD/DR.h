@@ -39,7 +39,7 @@ public:
     std::vector<RBDR*> RBDRch;
 
     DR(std::string LDName_);
-    void registerData(  std::vector<double> SampledValues,
+    void registerData(  std::shared_ptr< std::vector<double>> SampledValues,
                         std::vector<double> MMXUData,
                         double svTime,
                         bool PTOC1StrGen,

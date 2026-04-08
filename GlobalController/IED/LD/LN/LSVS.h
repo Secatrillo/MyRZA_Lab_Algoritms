@@ -14,6 +14,6 @@ public:
     std::shared_ptr<SAV> currentC;    
 
     LSVS(std::string LogicalNodeName_ = NULL, std::string LogicalDeviceRef_ = NULL);
-    void acceptIncomingSV(std::vector<double> svMessage);
-    std::array<SAV,3> sendSampledValues();
+    void acceptIncomingSV(std::shared_ptr<std::vector<double>> svMessage);
+    // std::array<std::shared_ptr<SAV>,3> sendSampledValues();
 };

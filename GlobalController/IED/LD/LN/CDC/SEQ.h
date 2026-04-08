@@ -6,14 +6,14 @@
 #include <string>
 #include <array>
 
-class WYE : public GenCommonDataClass, public GenDataObjectClass
+class SEQ : public GenCommonDataClass, public GenDataObjectClass
 {
 public:
     std::shared_ptr<CMV> phsA;
     std::shared_ptr<CMV> phsB;
     std::shared_ptr<CMV> phsC;
     
-    WYE(std::string DataObjectName_, std::string LNRef_, bool Presence_);
+    SEQ(std::string DataObjectName_, std::string LNRef_, bool Presence_);
     // std::array<std::shared_ptr<CMV>,3> sendData();
 };
 

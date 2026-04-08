@@ -8,7 +8,7 @@
 class MMXU : public GenLogicalNodeClass
 {
 public:
-    WYE A;
+    std::shared_ptr<WYE> A;
     std::shared_ptr<SAV> currentA;
     std::shared_ptr<SAV> currentB;
     std::shared_ptr<SAV> currentC;

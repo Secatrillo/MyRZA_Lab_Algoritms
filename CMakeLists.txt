@@ -15,6 +15,7 @@ include_directories(
 # Это создаст список всех исходников в переменную SOURCES
 file(GLOB_RECURSE SOURCES 
     "main.cpp"
+    "ExLabLibs/ParserComtrade.cpp"
     "GlobalController/*.cpp"
 )
 

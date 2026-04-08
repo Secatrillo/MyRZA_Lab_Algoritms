@@ -11,3 +11,12 @@ q(std::make_unique<Quality>("q", EnumFunctionalConstraints::MX, TriggerOption(fa
 t(std::make_unique<TimeStamp>("t", EnumFunctionalConstraints::MX, TriggerOption(), DataObjectRef_))
 {
 }
+
+void CMV::set_cVal(const Vector& vec) {
+    cVal->setMag(vec.getMag());
+    cVal->setAng(vec.getAng());
+}
+
+Vector& CMV::get_cVal(){
+    return *cVal;
+}

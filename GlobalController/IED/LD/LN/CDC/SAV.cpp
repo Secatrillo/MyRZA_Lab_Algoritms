@@ -4,10 +4,10 @@
 //q - метка качества
 
 SAV::SAV(std::string DataObjectName_, std::string LogicNodeRef_, bool Presence_):
-GenCommonDataClass("SAV"),
-GenDataObjectClass(DataObjectName_,LogicNodeRef_ + "$" + DataObjectName_, Presence_,  "SAV"),
-instMag(std::make_unique<AnalogValue>("instMag", EnumFunctionalConstraints::MX, TriggerOption(), this->getDataObjectRef())),
-q(std::make_unique<Quality>("q", EnumFunctionalConstraints::MX, TriggerOption(false,true,false), this->getDataObjectRef()))
+    GenCommonDataClass("SAV"),
+    GenDataObjectClass(DataObjectName_,LogicNodeRef_ + "$" + DataObjectName_, Presence_,  "SAV"),
+    instMag(std::make_unique<AnalogValue>("instMag", EnumFunctionalConstraints::MX, TriggerOption(), this->getDataObjectRef())),
+    q(std::make_unique<Quality>("q", EnumFunctionalConstraints::MX, TriggerOption(false,true,false), this->getDataObjectRef()))
 {
 }
 

@@ -9,12 +9,13 @@ dr("DR")
     IEDName=IEDName_;
 }
 
-void IED::setProtSettings(double StrValPTOC1, double OpDlTmmsPTOC1, double StrValPTOC2, double OpDlTmmsPTOC2)
+void IED::setSettings(double StrValPTOC1, double OpDlTmmsPTOC1, double StrValPTOC2, double OpDlTmmsPTOC2, bool FourierMode, int discrit)
 {
-    prot.setSettings(OpDlTmmsPTOC1,StrValPTOC1, OpDlTmmsPTOC2, StrValPTOC2);
+    prot.setSettings(OpDlTmmsPTOC1, StrValPTOC1, OpDlTmmsPTOC2, StrValPTOC2);
+    meas.setFourierMode(FourierMode, discrit);
 }
 
-void IED::modelIEDWork(std::vector<double> SVMessage, double timeValues)
+void IED::modelIEDWork(std::shared_ptr<std::vector<double>> SVMessage, double timeValues)
 {
     // GlobalTimeController::t = timeValues;
     // 2. Приём данных и расчёты в meas
@@ -22,16 +23,17 @@ void IED::modelIEDWork(std::vector<double> SVMessage, double timeValues)
     meas.sendLSVSDataToMMXU();
     meas.calculateFourier();
     meas.sendFourierDataToMMXU();
+    meas.sendMMXUDataToMSQI();
     // 3. Передача данных в защиту
-    prot.acceptDataFromMMXU(meas.MMXU1.A);
+    prot.acceptDataFromMSQI(meas.MSQI1.ZeroSeq);
     prot.imitateRP(timeValues);
     // 4. Передача сигнала Trip в устройство управления
     ctrl.receiveTripSignal(prot.PTRC1.Tr);
     // 5. Регистрируем данные в dr
     std::vector<double> MMXUmeas = {
-        meas.MMXU1.A.phsA->cVal->getMag(),
-        meas.MMXU1.A.phsB->cVal->getMag(),
-        meas.MMXU1.A.phsC->cVal->getMag()
+        meas.MMXU1.A->phsA->cVal->getMag(),
+        meas.MMXU1.A->phsB->cVal->getMag(),
+        meas.MMXU1.A->phsC->cVal->getMag()
     };
     
     MMXUData = MMXUmeas;
@@ -55,9 +57,9 @@ std::vector<double> IED::IEDAntireciverData()
     // 3. Передача данных IED
     std::vector<double> MMXUOtherData;
     MMXUOtherData = {
-        meas.MMXU1.A.phsA->cVal->getMag(),
-        meas.MMXU1.A.phsB->cVal->getMag(),
-        meas.MMXU1.A.phsC->cVal->getMag(),
+        meas.MMXU1.A->phsA->cVal->getMag(),
+        meas.MMXU1.A->phsB->cVal->getMag(),
+        meas.MMXU1.A->phsC->cVal->getMag(),
     };   
     MMXUData = MMXUOtherData;    
     return MMXUData;

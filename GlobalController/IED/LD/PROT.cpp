@@ -19,10 +19,10 @@ void PROT::setSettings(double tmOpPTOC1, double currentOpPTOC1, double tmOpPTOC2
     PTOC2.setOpDlTmms(tmOpPTOC2);
 }
 
-void PROT::acceptDataFromMMXU(WYE wye)
+void PROT::acceptDataFromMSQI(std::shared_ptr<CMV> data)
 { //Приём данных от устройства измерений
-    PTOC1.acceptDataFromMMXU(wye);
-    PTOC2.acceptDataFromMMXU(wye);
+    PTOC1.acceptDataFromMSQI(data);
+    PTOC2.acceptDataFromMSQI(data);
 }
 
 
@@ -45,8 +45,8 @@ void PROT::imitateRP(double timedat)
     
     
     // создаем локальный вектор перед вызовом
-    std::vector<std::shared_ptr<ACT>> ops = { PTOC1.Op, PTOC2.Op };
-    PTRC1.formTrip(ops);
+    
+    PTRC1.formTrip({ PTOC1.Op, PTOC2.Op });
 }
 
 
