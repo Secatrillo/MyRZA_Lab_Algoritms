@@ -21,7 +21,7 @@ int main()
         // Прогоняем все выборки через IED, чтобы DR заполнил данные
         for (size_t i = 0; i < times.size(); ++i)
         {
-            std::shared_ptr<std::vector<double>> SVMessage;
+            std::shared_ptr<std::vector<double>> SVMessage = std::make_shared<std::vector<double>>();
             SVMessage->push_back(currentsA[i]);
             SVMessage->push_back(currentsB[i]);
             SVMessage->push_back(currentsC[i]);
