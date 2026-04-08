@@ -1,10 +1,8 @@
 #ifndef TRIGGEROPTION_H
 #define TRIGGEROPTION_H
 
-class TriggerOption
+struct TriggerOption
 {
-public:
-    /* data */
     bool dchg;
     bool qchg;
     bool dupd;

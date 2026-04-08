@@ -1,21 +1,18 @@
-#ifndef MMXU_H
-#define MMXU_H
+#pragma once
 
 #include "GenLogicalNodeClass.h"
 #include "CDC/WYE.h"
 #include "CDC/SAV.h"
-#include "../../../../include.h"
+
 
 class MMXU : public GenLogicalNodeClass
 {
 public:
     WYE A;
-    SAV currentA;
-    SAV currentB;
-    SAV currentC;
+    std::shared_ptr<SAV> currentA;
+    std::shared_ptr<SAV> currentB;
+    std::shared_ptr<SAV> currentC;
 
-    MMXU(string LogicalNodeName_ = NULL, string LogicalDeviceRef_ = NULL);
+    MMXU(std::string LogicalNodeName_ = NULL, std::string LogicalDeviceRef_ = NULL);
 };
 
-
-#endif

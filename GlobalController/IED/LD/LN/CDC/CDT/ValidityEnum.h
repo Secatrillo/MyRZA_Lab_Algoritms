@@ -1,7 +1,5 @@
-#ifndef VALIDITY_ENUM_H
-#define VALIDITY_ENUM_H
+#pragma once
 
-#include "../../../../../../include.h"
 
 enum class ValidityEnum
 {
@@ -10,5 +8,3 @@ enum class ValidityEnum
     reserved, //Зарезервировано
     questionable //Под сомнением
 };
-
-#endif

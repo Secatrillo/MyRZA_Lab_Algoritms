@@ -1,26 +1,25 @@
-#ifndef ACT_H
-#define ACT_H
+#pragma once
 
-#include "GenDataAttributeClass.h"
+#include "CDT/GenDataAttributeClass.h"
 #include "CDT/EnumFunctionalConstraints.h"
 #include "CDT/TriggerOption.h"
 #include "GenCommonDataClass.h"
 #include "CDT/Quality.h"
 #include "CDT/TimeStamp.h"
 #include "GenDataObjectClass.h"
-#include "../../../../../include.h"
+#include <string>
+
 
 class ACT : public GenCommonDataClass, public GenDataObjectClass
 {
 public:
-    GenDataAttributeClass general;
-    Quality q;
-    TimeStamp t;
-    GenDataAttributeClass phsA;
-    GenDataAttributeClass phsB;
-    GenDataAttributeClass phsC;
+    ptr<GDAClass> general;
+    ptr<Quality> q;
+    ptr<TimeStamp> t;
+    ptr<GDAClass> phsA;
+    ptr<GDAClass> phsB;
+    ptr<GDAClass> phsC;
 
-    ACT(string DataObjectName_, string LNRef_, bool Presence_);
+    ACT(std::string DataObjectName_, std::string LNRef_, bool Presence_);
 };
 
-#endif

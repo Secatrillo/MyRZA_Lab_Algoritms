@@ -1,20 +1,19 @@
-#ifndef WYE_H
-#define WYE_H
+#pragma once
 
 #include "GenCommonDataClass.h"
 #include "GenDataObjectClass.h"
 #include "CMV.h"
-#include "../../../../../include.h"
+#include <string>
+#include <array>
 
 class WYE : public GenCommonDataClass, public GenDataObjectClass
 {
 public:
-    CMV phsA;
-    CMV phsB;
-    CMV phsC;
+    std::shared_ptr<CMV> phsA;
+    std::shared_ptr<CMV> phsB;
+    std::shared_ptr<CMV> phsC;
     
-    WYE(string DataObjectName_, string LNRef_, bool Presence_);
-    array<CMV,3> sendData();
+    WYE(std::string DataObjectName_, std::string LNRef_, bool Presence_);
+    std::array<std::shared_ptr<CMV>,3> sendData();
 };
 
-#endif

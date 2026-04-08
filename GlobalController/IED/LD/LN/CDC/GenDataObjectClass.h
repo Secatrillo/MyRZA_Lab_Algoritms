@@ -1,19 +1,35 @@
-#ifndef GENDATAOBJECTCLASS_H
-#define GENDATAOBJECTCLASS_H
+#pragma once
 
-#include "../../../../../include.h"
+#include <string>
+#include <memory>
+#include <vector>
+#include <string>
 
-using namespace std;
+template<typename T>
+using ptr = std::unique_ptr<T>;
+
+
+
 
 class GenDataObjectClass
 {
-public:
-    string DataObjectName; //Наименование dataObject
-    string DataObjectRef; //Имя пути экземпляра dataObject
-    bool Presence; //Обязательность/опциональность
-    string DataObjectType; //CDC тип dataObject
+    public:
+        
+        std::string getDataObjectName();
+        std::string getDataObjectRef();
+        bool        getPresence();
+        std::string getDataObjectType();
 
-    GenDataObjectClass(string DataObjectName_ = NULL, string DataObjectRef_ = NULL, bool Presence_ = false, string DataObjectType_ = NULL);
+        void setDataObjectName(std::string name);
+        void setDataObjectRef(std::string ref);
+        void setPresence(bool presence);
+        void setDataObjectType(std::string type);
+
+        GenDataObjectClass(std::string DataObjectName_ = NULL, std::string DataObjectRef_ = NULL, bool Presence_ = false, std::string DataObjectType_ = NULL);
+    private:
+        std::string DataObjectName; //Наименование dataObject
+        std::string DataObjectRef; //Имя пути экземпляра dataObject
+        bool Presence; //Обязательность/опциональность
+        std::string DataObjectType; //CDC тип dataObject
 };
 
-#endif

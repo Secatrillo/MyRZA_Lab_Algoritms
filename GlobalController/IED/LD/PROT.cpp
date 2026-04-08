@@ -3,7 +3,7 @@
 //PTOC1 - Логический узел ТО без ВВ
 //PTOC2 - Логический узел ТО с ВВ (МТЗ)
 //PTRC1 - Логический узел формирования сигнала на отключение
-PROT::PROT(string LDName_):
+PROT::PROT(std::string LDName_):
 GenLogicalDeviceClass(LDName_),
 PTOC1("PTOC1", LDName_),
 PTOC2("PTOC2", LDName_),
@@ -34,18 +34,18 @@ void PROT::imitateRP(double timedat)
     PTOC2.checkReturn();
     PTOC1.checkTimeStr(timedat);
     PTOC2.checkTimeStr(timedat);
-    if (PTOC1.Op.general.value == 1)
+    if (PTOC1.Op->general->getvalue() == 1)
     {
-        PTOC2.Op.general.value = 0;
-        PTOC2.Str.general.value = 0;
-        PTOC2.Str.phsA.value = 0;
-        PTOC2.Str.phsB.value = 0;
-        PTOC2.Str.phsC.value = 0;
+        PTOC2.Op->general->setvalue(0);
+        PTOC2.Str->general->setvalue(0);
+        PTOC2.Str->phsA->setvalue(0);
+        PTOC2.Str->phsB->setvalue(0);
+        PTOC2.Str->phsC->setvalue(0);
     }
     
     
     // создаем локальный вектор перед вызовом
-    vector<ACT*> ops = { &PTOC1.Op, &PTOC2.Op };
+    std::vector<std::shared_ptr<ACT>> ops = { PTOC1.Op, PTOC2.Op };
     PTRC1.formTrip(ops);
 }
 

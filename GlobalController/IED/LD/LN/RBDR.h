@@ -1,20 +1,19 @@
-#ifndef RBDR_H
-#define RBDR_H
+#pragma once
 
 #include "CDC/SPS.h"
 #include "GenLogicalNodeClass.h"
-#include "../../../../include.h"
+
 
 class RBDR : public GenLogicalNodeClass
 {
 public:
-    SPS ChTrg;
-    vector<int> ChData;
-    string ChName;
-    vector<double> tData;
-    RBDR(string LogicalNodeName_, string LogicalDeviceRef_, string ChName_);
-    void catchDiscreteSignal(bool discreteSignal, double tData);
-    vector<int> getDiscreteValues();
-};
+    std::shared_ptr<SPS> ChTrg;
 
-#endif
+    std::vector<int> ChData;
+    std::string ChName;
+    std::vector<double> tData;
+    
+    RBDR(std::string LogicalNodeName_, std::string LogicalDeviceRef_, std::string ChName_);
+    void catchDiscreteSignal(bool discreteSignal, double tData);
+    std::vector<int> getDiscreteValues();
+};

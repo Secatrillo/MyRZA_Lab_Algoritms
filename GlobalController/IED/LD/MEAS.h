@@ -1,7 +1,6 @@
-#ifndef MEAS_H
-#define MEAS_H
+#pragma once
 
-#include "../../../include.h"
+
 #include "GenLogicalDeviceClass.h"
 #include "LN/LSVS.h"
 #include "LN/MMXU.h"
@@ -14,11 +13,10 @@ public:
     MMXU MMXU1;
     Fourier Fourier1;
 
-    MEAS(string LDName_);
-    void acceptSV(vector<double> sv);
+    MEAS(std::string LDName_);
+    void acceptSV(std::vector<double> sv);
     void calculateFourier();
     void sendFourierDataToMMXU();
     void sendLSVSDataToMMXU();
 };
 
-#endif

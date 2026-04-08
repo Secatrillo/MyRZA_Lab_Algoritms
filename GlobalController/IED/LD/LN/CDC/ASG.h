@@ -1,19 +1,17 @@
-#ifndef ASG_H
-#define ASG_H
+#pragma once 
 
 #include "CDT/EnumFunctionalConstraints.h"
 #include "CDT/TriggerOption.h"
 #include "GenCommonDataClass.h"
 #include "CDT/AnalogValue.h"
 #include "GenDataObjectClass.h"
-#include "../../../../../include.h"
+#include <string>
 
 class ASG : public GenCommonDataClass, public GenDataObjectClass
 {
 public:
-    AnalogValue setMag;
+    ptr<AnalogValue> setMag;
 
-    ASG(string DataObjectName_, string LNRef_, bool Presence_);
+    ASG(std::string DataObjectName_, std::string LNRef_, bool Presence_);
 };
 
-#endif

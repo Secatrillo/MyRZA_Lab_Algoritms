@@ -1,5 +1,4 @@
-#ifndef CMV_H
-#define CMV_H
+#pragma once
 
 #include "GenCommonDataClass.h"
 #include "GenDataObjectClass.h"
@@ -8,16 +7,14 @@
 #include "CDT/Quality.h"
 #include "CDT/TriggerOption.h"
 #include "CDT/TimeStamp.h"
-#include "../../../../../include.h"
+#include <string>
 
 class CMV : public GenCommonDataClass, public GenDataObjectClass
 {
 public:
-    Vector cVal;
-    Quality q;
-    TimeStamp t;
-    CMV(string SubDataObjectName_, bool Presence_, string DataObjectRef_);
+    ptr<Vector> cVal;
+    ptr<Quality> q;
+    ptr<TimeStamp> t;
+    CMV(std::string SubDataObjectName_, bool Presence_, std::string DataObjectRef_);
 };
 
-
-#endif

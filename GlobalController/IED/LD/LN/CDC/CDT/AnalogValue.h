@@ -1,20 +1,18 @@
-#ifndef ANALOG_VALUE_H
-#define ANALOG_VALUE_H
+#pragma once
 
-#include "../GenDataAttributeClass.h"
+#include "GenDataAttributeClass.h"
 #include "TriggerOption.h"
 #include <string>
+#include <memory>
 
-using namespace std;
 
-class AnalogValue: public GenDataAttributeClass
-{
-public:
-    GenDataAttributeClass f;
-    AnalogValue(string DataAttributeName_, EnumFunctionalConstraints FunctionalConstraint_,TriggerOption TrgOp_, string DataObjectRef_);
 
-    void setNewValue(double newValue);
-    double getValue();
+class AnalogValue: public GenDataAttributeClass {
+    public:
+        std::unique_ptr<GenDataAttributeClass> f;
+        AnalogValue(std::string DataAttributeName_, EnumFunctionalConstraints FunctionalConstraint_,TriggerOption TrgOp_, std::string DataObjectRef_);
+
+        void setNewValue(double newValue);
+        double getValue();
 };
 
-#endif

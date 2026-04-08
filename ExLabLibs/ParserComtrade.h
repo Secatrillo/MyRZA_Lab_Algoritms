@@ -7,20 +7,29 @@
 struct AnalogChannel
 {
     int index;
-    string name;
-    string unit;
+    std::string name;
+    std::string unit;
 
     double a;
     double b;
+
+    AnalogChannel(int index, std::string name, std::string unit, double a, double b): 
+        index(index),
+        name(name),
+        unit(unit),
+        a(a),
+        b(b)
+        {} 
+     
 };
 class ParserComtrade
 {
 public:
-    ParserComtrade(const string& cfg_file, const string& dat_file);
+    ParserComtrade(const std::string& cfg_file, const std::string& dat_file);
 
-    const vector<double>& getChannelData(int idx) const {return analogData[idx];}
+    const std::vector<double>& getChannelData(int idx) const {return analogData[idx];}
     int getSamplesCount() const {return total_samples;}
-    const vector<double> &getTimeData() const { return timeData; }
+    const std::vector<double> &getTimeData() const { return timeData; }
 
     // vector<vector<double>> scan_comtrade();
     // const vector<vector<double>> &getAnalogData() const { return analogData; }
@@ -28,14 +37,14 @@ public:
     // const vector<double> &getTime() const { return timeData; }
 
 private:
-    string cfg_file;
-    string dat_file;
+    std::string cfg_file;
+    std::string dat_file;
     int total_samples = 0;
     double sample_rate = 0;
     int analog_count = 0;
-    vector<double> timeData;
-    vector<vector<double>> analogData;
-    vector<AnalogChannel> analogChannels;
+    std::vector<double> timeData;
+    std::vector<std::vector<double>> analogData;
+    std::vector<AnalogChannel> analogChannels;
 
     // int parseAnalogCountFromCfg(const string &cfgPath);
 };

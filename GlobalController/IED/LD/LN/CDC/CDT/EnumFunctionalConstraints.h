@@ -1,9 +1,7 @@
-#ifndef ENUM_FUNCTIONAL_CONSTRAINTS_H
-#define ENUM_FUNCTIONAL_CONSTRAINTS_H
-
+#pragma once
 #include <string>
 
-enum class EnumFunctionalConstraints {
+typedef enum class EnumFunctionalConstraints {
     ST, // Информация о состоянии
     MX, // Измеряемые величины
     CO, // Управление
@@ -22,6 +20,5 @@ enum class EnumFunctionalConstraints {
     MS, // Многоадресное управление выборочными значениями
     US, // Одноадресное управление выборочными значениями
     XX  // Представление всех атрибутов данных
-};
+} EFC;
 
-#endif

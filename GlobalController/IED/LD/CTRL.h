@@ -1,19 +1,17 @@
-#ifndef CTRL_H
-#define CTRL_H
+#pragma once
 
 #include "LN/CDC/ACT.h"
 #include "GenLogicalDeviceClass.h"
 #include "LN/CSWI.h"
 #include "LN/XCBR.h"
-#include "../../../include.h"
+
 
 class CTRL : public GenLogicalDeviceClass
 {
 public:
     CSWI CSWI1;
     XCBR XCBR1;
-    CTRL(string LDName_);
-    void receiveTripSignal(ACT TripSignal);
+    CTRL(std::string LDName_);
+    void receiveTripSignal(std::shared_ptr<ACT> TripSignal);
 };
 
-#endif

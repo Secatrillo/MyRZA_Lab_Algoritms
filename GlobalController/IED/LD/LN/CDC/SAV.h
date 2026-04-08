@@ -1,5 +1,4 @@
-#ifndef SAV_H
-#define SAV_H
+#pragma once
 
 #include "GenCommonDataClass.h"
 #include "GenDataObjectClass.h"
@@ -7,18 +6,17 @@
 #include "CDT/Quality.h"
 #include "CDT/TriggerOption.h"
 #include "CDT/AnalogValue.h"
-#include "../../../../../include.h"
+#include <string>
 
 class SAV: public GenCommonDataClass, public GenDataObjectClass
 {
 
 public:
-    AnalogValue instMag;
-    Quality q;
+    ptr<AnalogValue> instMag;
+    ptr<Quality> q;
 
-    SAV(string DataObjectName_, string LogicNodeRef_, bool Presence_);
+    SAV(std::string DataObjectName_, std::string LogicNodeRef_, bool Presence_);
     void setInstMag(double newInstMag);
     double getInstMag();
 };
 
-#endif

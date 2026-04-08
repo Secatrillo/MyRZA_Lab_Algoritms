@@ -1,23 +1,21 @@
-#ifndef VECTOR_H
-#define VECTOR_H
+#pragma once
 
 #include "AnalogValue.h"
-#include "../GenDataAttributeClass.h"
+#include "GenDataAttributeClass.h"
 #include "EnumFunctionalConstraints.h"
 #include "TriggerOption.h"
-#include "../../../../../../include.h"
+#include <string>
+#include <memory>
 
-class Vector : public GenDataAttributeClass
-{
+class Vector : public GenDataAttributeClass{
+    public:
 
-public:
-    AnalogValue mag;
 
-    Vector(string DataAttributeName_, EnumFunctionalConstraints FunctionalConstraint_, TriggerOption TrgOp_, string DataObjectRef_);
+        Vector(std::string DataAttributeName_, EnumFunctionalConstraints FunctionalConstraint_, TriggerOption TrgOp_, std::string DataObjectRef_);
 
-    void setMag(double newValue);
-    double getMag();
+        void setMag(double newValue);
+        double getMag();
+    private:
+        std::unique_ptr<AnalogValue> mag;
 
 };
-
-#endif

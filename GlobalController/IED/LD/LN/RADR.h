@@ -1,22 +1,20 @@
-#ifndef RADR_H
-#define RADR_H
+#pragma once
 
 #include "CDC/SPS.h"
 #include "GenLogicalNodeClass.h"
-#include "../../../../include.h"
+
 
 class RADR : public GenLogicalNodeClass
 {
 public:
-    SPS ChTrg;
-    string ChName;
-    vector<double> ChData;
-    vector<double> tData;
+    std::shared_ptr<SPS> ChTrg;
+    
+    std::string ChName;
+    std::vector<double> ChData;
+    std::vector<double> tData;
 
-    RADR(string LogicalNodeName_, string LogicalDeviceRef_, string ChName_);
+    RADR(std::string LogicalNodeName_, std::string LogicalDeviceRef_, std::string ChName_);
     void catchAnalogValue(double data, double tData);
-    vector<double> getAnalogValues();
-    vector<double> getTimeData();
+    std::vector<double> getAnalogValues();
+    std::vector<double> getTimeData();
 };
-
-#endif

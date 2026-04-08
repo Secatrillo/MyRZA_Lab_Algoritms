@@ -1,13 +1,13 @@
-#ifndef GENLOGICALDEVICECLASS_H
-#define GENLOGICALDEVICECLASS_H
+#pragma once
 
-#include "../../../include.h"
+#include <string>
+#include <vector>
+#include <array>
 
 class GenLogicalDeviceClass
 { //General class for logical devices
 public:
-    string LDName; //LDName - имя логического устройства
-    GenLogicalDeviceClass(string LDName_);
+    std::string LDName; //LDName - имя логического устройства
+    GenLogicalDeviceClass(std::string LDName_);
 };
 
-#endif

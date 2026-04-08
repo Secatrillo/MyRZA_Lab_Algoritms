@@ -1,16 +1,13 @@
-#ifndef PTRC_H
-#define PTRC_H
+#pragma once
 
-#include "../../../../include.h"
 #include "CDC/ACT.h"
 #include "GenLogicalNodeClass.h"
 
 class PTRC : public GenLogicalNodeClass
 {
 public:
-    ACT Tr;
-    PTRC(string LogicalNodeName_ = NULL, string LogicalDeviceRef_ = NULL);
-    void formTrip(const vector<ACT*>& opList);
-};
+    std::shared_ptr<ACT> Tr;
 
-#endif
+    PTRC(std::string LogicalNodeName_ = NULL, std::string LogicalDeviceRef_ = NULL);
+    void formTrip(const std::vector<std::shared_ptr<ACT>> opList);
+};

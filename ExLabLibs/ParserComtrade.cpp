@@ -9,52 +9,48 @@
 
 
 
-ParserComtrade::ParserComtrade(const string& cfg_file_, const string& dat_file_) : cfg_file(move(cfg_file_)), dat_file(move(dat_file_))
+ParserComtrade::ParserComtrade(const std::string& cfg_file_, const std::string& dat_file_) : cfg_file(move(cfg_file_)), dat_file(move(dat_file_))
 {
     //////////////////////////////////////////////////
 
-    ifstream cfg(cfg_file);
-    string line;
+    std::ifstream cfg(cfg_file);
+    std::string line;
 
-    if (!cfg.is_open()) throw runtime_error("Could not open CFG file");
+    if (!cfg.is_open()) throw std::runtime_error("Could not open CFG file");
 
     getline(cfg, line);
     getline(cfg, line);
 
-    stringstream ss_count(line);
-    string tmp;
+    std::stringstream ss_count(line);
+    std::string tmp;
     getline(ss_count, tmp, ',');
     int total_ch = stoi(tmp);
 
     for (int i = 0; i < total_ch; ++i)
     {
         getline(cfg, line);
-        if (line.find(",A") == string::npos && line.find(",P") == string::npos) continue;
+        if (line.find(",A") == std::string::npos && line.find(",P") == std::string::npos) continue;
 
-        stringstream ss(line);
-        vector<string> tokens;
+        std::stringstream ss(line);
+        std::vector<std::string> tokens;
         while (getline(ss, tmp, ',')) tokens.push_back(tmp);
 
-        AnalogChannel ch;
-        ch.index = stoi(tokens[0]);
-        ch.name = tokens[1];
-        ch.a = stod(tokens[5]);
-        ch.b = stod(tokens[6]);
-        analogChannels.push_back(ch);
+        
+        analogChannels.push_back(AnalogChannel(stoi(tokens[0]),tokens[1],tokens[4],stod(tokens[5]),stod(tokens[6])));
     }
 
     analogData.resize(analogChannels.size());
     
     ////////////////////////////////////////////////////////////////
     
-    ifstream dat(dat_file);
-    if (!dat.is_open()) throw runtime_error("Could not open DAT file");
+    std::ifstream dat(dat_file);
+    if (!dat.is_open()) throw std::runtime_error("Could not open DAT file");
 
     while (getline(dat, line))
     {
         if(line.empty()) continue;
-        stringstream ss(line);
-        string tmp;
+        std::stringstream ss(line);
+        std::string tmp;
 
         getline(ss, tmp, ',');
 
@@ -69,12 +65,8 @@ ParserComtrade::ParserComtrade(const string& cfg_file_, const string& dat_file_)
         for (int i = 0; i < analogChannels.size(); ++i)
         {
             getline(ss, tmp, ',');
-            if (!tmp.empty())
-            {
-                double raw = stod(tmp);
-                double real_val = (raw * analogChannels[i].a) + analogChannels[i].b;
-                analogData[i].push_back(real_val);
-            }            
+            if (!tmp.empty()) analogData[i].push_back((stod(tmp) * analogChannels[i].a) + analogChannels[i].b);
+           
         }
         total_samples++;
     }

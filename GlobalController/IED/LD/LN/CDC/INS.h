@@ -1,22 +1,20 @@
-#ifndef INS_H
-#define INS_H
+#pragma once
 
-#include "GenDataAttributeClass.h"
+#include "CDT/GenDataAttributeClass.h"
 #include "CDT/EnumFunctionalConstraints.h"
 #include "CDT/TriggerOption.h"
 #include "GenCommonDataClass.h"
 #include "CDT/Quality.h"
 #include "CDT/TimeStamp.h"
 #include "GenDataObjectClass.h"
-#include "../../../../../include.h"
+#include <string>
 
 class INS : public GenCommonDataClass, public GenDataObjectClass
 {
 public:
-    GenDataAttributeClass stVal;
-    Quality q;
-    TimeStamp t;
-    INS(string DataObjectName_, string LNRef_, bool Presence_);
+    ptr<GenDataAttributeClass> stVal;
+    ptr<Quality> q;
+    ptr<TimeStamp> t;
+    INS(std::string DataObjectName_, std::string LNRef_, bool Presence_);
 };
 
-#endif

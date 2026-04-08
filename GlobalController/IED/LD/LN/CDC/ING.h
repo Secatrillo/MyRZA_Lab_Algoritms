@@ -1,19 +1,17 @@
-#ifndef ING_H
-#define ING_H
+#pragma once
 
-#include "GenDataAttributeClass.h"
+#include "CDT/GenDataAttributeClass.h"
 #include "GenCommonDataClass.h"
 #include "GenDataObjectClass.h"
 #include "CDT/EnumFunctionalConstraints.h"
 #include "CDT/TriggerOption.h"
-#include "../../../../../include.h"
+#include <string>
 
 class ING : public GenCommonDataClass, public GenDataObjectClass
 {
 public:
-    GenDataAttributeClass setVal;
+    ptr<GenDataAttributeClass> setVal;
 
-    ING(string DataObjectName_, string LNRef_, bool Presence_);
+    ING(std::string DataObjectName_, std::string LNRef_, bool Presence_);
 };
 
-#endif

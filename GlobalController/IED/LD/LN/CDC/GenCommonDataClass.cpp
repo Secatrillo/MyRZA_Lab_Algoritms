@@ -1,8 +1,5 @@
-#include <string>
 #include "GenCommonDataClass.h"
 
-using namespace std;
 
-GenCommonDataClass::GenCommonDataClass(string CDCid_): CDCid(CDCid_)
-{
-}
+GenCommonDataClass::GenCommonDataClass(std::string CDCid_): CDCid(CDCid_){}
+

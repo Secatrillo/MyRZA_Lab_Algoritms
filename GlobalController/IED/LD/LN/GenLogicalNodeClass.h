@@ -1,15 +1,23 @@
-#ifndef GENLOGICALNODECLASS_H
-#define GENLOGICALNODECLASS_H
+#pragma once
 
-#include "../../../../include.h"
+#include <string>
 
-class GenLogicalNodeClass
-{ //General Logical Node Class
+ //General Logical Node Class
+class GenLogicalNodeClass{
 
-public:
-    string LogicalNodeName=NULL;
-    string LNRef=NULL;
-    GenLogicalNodeClass(string LogicalNodeName__, string LNRef_);
+
+    public:
+        
+        GenLogicalNodeClass(std::string LogicalNodeName__, std::string LNRef_);
+
+        std::string getLogicalNodeName();
+        std::string getLNRef();
+
+        void setLogicalNodeName(std::string name);
+        void setLNRef(std::string ref);
+
+    private:
+        std::string LogicalNodeName=NULL;
+        std::string LNRef=NULL;
 };
 
-#endif

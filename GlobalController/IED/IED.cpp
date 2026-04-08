@@ -1,76 +1,77 @@
 #include "IED.h"
 
-IED::IED(string IEDName_):
-MEAS("MEAS"),
-PROT("PROT"),
-CTRL("CTRL"),
-DR("DR")
+IED::IED(std::string IEDName_):
+meas("MEAS"),
+prot("PROT"),
+ctrl("CTRL"),
+dr("DR")
 {
     IEDName=IEDName_;
 }
 
 void IED::setProtSettings(double StrValPTOC1, double OpDlTmmsPTOC1, double StrValPTOC2, double OpDlTmmsPTOC2)
 {
-    PROT.setSettings(OpDlTmmsPTOC1,StrValPTOC1, OpDlTmmsPTOC2, StrValPTOC2);
+    prot.setSettings(OpDlTmmsPTOC1,StrValPTOC1, OpDlTmmsPTOC2, StrValPTOC2);
 }
 
-void IED::modelIEDWork(vector<double> SVMessage, double timeValues)
+void IED::modelIEDWork(std::vector<double> SVMessage, double timeValues)
 {
     // GlobalTimeController::t = timeValues;
-    // 2. Приём данных и расчёты в MEAS
-    MEAS.acceptSV(SVMessage);
-    MEAS.sendLSVSDataToMMXU();
-    MEAS.calculateFourier();
-    MEAS.sendFourierDataToMMXU();
+    // 2. Приём данных и расчёты в meas
+    meas.acceptSV(SVMessage);
+    meas.sendLSVSDataToMMXU();
+    meas.calculateFourier();
+    meas.sendFourierDataToMMXU();
     // 3. Передача данных в защиту
-    PROT.acceptDataFromMMXU(MEAS.MMXU1.A);
-    PROT.imitateRP(timeValues);
+    prot.acceptDataFromMMXU(meas.MMXU1.A);
+    prot.imitateRP(timeValues);
     // 4. Передача сигнала Trip в устройство управления
-    CTRL.receiveTripSignal(PROT.PTRC1.Tr);
-    // 5. Регистрируем данные в DR
-    vector<double> MMXUMeas = {
-    MEAS.MMXU1.A.phsA.cVal.mag.f.value,
-    MEAS.MMXU1.A.phsB.cVal.mag.f.value,
-    MEAS.MMXU1.A.phsC.cVal.mag.f.value};
+    ctrl.receiveTripSignal(prot.PTRC1.Tr);
+    // 5. Регистрируем данные в dr
+    std::vector<double> MMXUmeas = {
+        meas.MMXU1.A.phsA->cVal->getMag(),
+        meas.MMXU1.A.phsB->cVal->getMag(),
+        meas.MMXU1.A.phsC->cVal->getMag()
+    };
     
-    MMXUData = MMXUMeas;
+    MMXUData = MMXUmeas;
 
-    DR.registerData(SVMessage, MMXUMeas, timeValues, 
-    PROT.PTOC1.Str.general.value,
-    PROT.PTOC1.Str.phsA.value,
-    PROT.PTOC1.Str.phsB.value,
-    PROT.PTOC1.Str.phsC.value,
-    PROT.PTOC1.Op.general.value,
-    PROT.PTOC2.Str.general.value,
-    PROT.PTOC2.Str.phsA.value,
-    PROT.PTOC2.Str.phsB.value,
-    PROT.PTOC2.Str.phsC.value,
-    PROT.PTOC2.Op.general.value,
-    PROT.PTRC1.Tr.general.value);
+    dr.registerData(SVMessage, MMXUmeas, timeValues, 
+    prot.PTOC1.Str->general->getvalue(),
+    prot.PTOC1.Str->phsA->getvalue(),
+    prot.PTOC1.Str->phsB->getvalue(),
+    prot.PTOC1.Str->phsC->getvalue(),
+    prot.PTOC1.Op->general->getvalue(),
+    prot.PTOC2.Str->general->getvalue(),
+    prot.PTOC2.Str->phsA->getvalue(),
+    prot.PTOC2.Str->phsB->getvalue(),
+    prot.PTOC2.Str->phsC->getvalue(),
+    prot.PTOC2.Op->general->getvalue(),
+    prot.PTRC1.Tr->general->getvalue());
 }
 
-vector<double> IED::IEDAntireciverData()
+std::vector<double> IED::IEDAntireciverData()
 {
     // 3. Передача данных IED
-    vector<double> MMXUOtherData;
+    std::vector<double> MMXUOtherData;
     MMXUOtherData = {
-        MEAS.MMXU1.A.phsA.cVal.mag.f.value,
-        MEAS.MMXU1.A.phsB.cVal.mag.f.value,
-        MEAS.MMXU1.A.phsC.cVal.mag.f.value,
+        meas.MMXU1.A.phsA->cVal->getMag(),
+        meas.MMXU1.A.phsB->cVal->getMag(),
+        meas.MMXU1.A.phsC->cVal->getMag(),
     };   
     MMXUData = MMXUOtherData;    
     return MMXUData;
 }
 
-void IED::IEDReciverData(double timeValues, vector<double> MMXUOtherMeas)
+void IED::IEDReciverData(double timeValues, std::vector<double> MMXUOtherMeas)
 {
-    DR.registerOtherData(MMXUOtherMeas, timeValues);
+    dr.registerOtherData(MMXUOtherMeas, timeValues);
 }
 
-void IED::watchOscill(ParserComtrade parser_, string filename_, string plotscriptFile_, string pngFile_)
+void IED::watchOscill(ParserComtrade parser_, std::string filename_, std::string plotscriptFile_, std::string pngFile_)
 {
-    DR.exportForGnuplot(parser_, filename_);
-    DR.showPlot(filename_, plotscriptFile_, pngFile_);
+    dr.exportForGnuplot(parser_, filename_);
+    dr.showPlot(filename_, plotscriptFile_, pngFile_);
 }
 
 

@@ -1,3 +1,3 @@
 #include "GenLogicalDeviceClass.h"
 
-GenLogicalDeviceClass::GenLogicalDeviceClass(string LDName_): LDName(LDName_){}
+GenLogicalDeviceClass::GenLogicalDeviceClass(std::string LDName_): LDName(LDName_){}

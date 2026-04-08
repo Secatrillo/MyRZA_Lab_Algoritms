@@ -1,12 +1,11 @@
-#ifndef TIMEQUALITY_H
-#define TIMEQUALITY_H
+#pragma once
 
-#include "../../../../../../include.h"
+#include <vector>
 
 class TimeQuality
 {
 public:
-    vector<double> time_quality;
+    std::vector<double> time_quality;
     bool LeapSecondKnown = true;
     bool ClockFailure = false;
     bool ClockNotSynchronized = false;
@@ -15,4 +14,3 @@ public:
     TimeQuality();
 };
 
-#endif

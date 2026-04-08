@@ -1,7 +1,6 @@
-#ifndef SOURCE_ENUM_H
-#define SOURCE_ENUM_H
+#pragma once
 
-#include "../../../../../../include.h"
+
 
 enum class SourceEnum
 {
@@ -9,4 +8,3 @@ enum class SourceEnum
     substituted //Заменённый
 };
 
-#endif

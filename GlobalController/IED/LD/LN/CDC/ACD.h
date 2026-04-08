@@ -1,27 +1,25 @@
-#ifndef ACD_H
-#define ACD_H
+#pragma once
 
-#include "GenDataAttributeClass.h"
+#include "CDT/GenDataAttributeClass.h"
 #include "CDT/EnumFunctionalConstraints.h"
 #include "CDT/TriggerOption.h"
 #include "GenCommonDataClass.h"
 #include "CDT/Quality.h"
 #include "CDT/TimeStamp.h"
 #include "GenDataObjectClass.h"
-#include "../../../../../include.h"
+
 
 class ACD : public GenCommonDataClass, public GenDataObjectClass
 {
 public:
-    GenDataAttributeClass general;  //срабатывание наравленной защиты общее
-    GenDataAttributeClass dirGeneral;  //направленность защиты общее
-    Quality q;  //метка качества
-    TimeStamp t;  //метка времени
-    GenDataAttributeClass phsA;  //срабатывание защиты в фазе А
-    GenDataAttributeClass phsB;  //срабатывание защиты в фазе В
-    GenDataAttributeClass phsC;  //срабатывание защиты в фазе С
+    ptr<GDAClass> general;  //срабатывание наравленной защиты общее
+    ptr<GDAClass> dirGeneral;  //направленность защиты общее
+    ptr<Quality> q;  //метка качества
+    ptr<TimeStamp> t;  //метка времени
+    ptr<GDAClass> phsA;  //срабатывание защиты в фазе А
+    ptr<GDAClass> phsB;  //срабатывание защиты в фазе В
+    ptr<GDAClass> phsC;  //срабатывание защиты в фазе С
 
-    ACD(string DataObjectName_, string LNRef_, bool Presence_);
+    ACD(std::string DataObjectName_, std::string LNRef_, bool Presence_);
 };
 
-#endif

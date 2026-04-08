@@ -3,14 +3,13 @@
 #include <cstdio> // popen, pclose, FILE*
 #include <stdexcept>
 #include <string>
-#include <vector>
 #include <fstream>
 #include <sstream>
 // Логическое устройство регистратора аварийных событий
 // RADR1-RADR3 - Логические узлы регистрации входных аналоговых каналов
 // RADR4-RADR6 - Логические узлы регистрации измеренных значений аналоговых данных
 // RBDR1-RBDR11 - Логические узлы регистрации дискретных сигналов внутри терминалов (см. названия сигналов
-DR::DR(string LDName_) : GenLogicalDeviceClass(LDName_),
+DR::DR(std::string LDName_) : GenLogicalDeviceClass(LDName_),
                          RDRE1("RDRE1", LDName_),
                          RADR1("RADR1", LDName_, "IaLine"),
                          RADR2("RADR2", LDName_, "IbLine"),
@@ -41,7 +40,7 @@ DR::DR(string LDName_) : GenLogicalDeviceClass(LDName_),
               &RBDR7, &RBDR8, &RBDR9, &RBDR10, &RBDR11};
 }
 
-void DR::registerData(vector<double> SampledValues, vector<double> MMXUData, double svTime, bool PTOC1StrGen, bool PTOC1StrPhA, bool PTOC1StrPhB, bool PTOC1StrPhC, bool PTOC1OpGen, bool PTOC2StrGen, bool PTOC2StrPhA, bool PTOC2StrPhB, bool PTOC2StrPhC, bool PTOC2OpGen, bool PTRCTrip)
+void DR::registerData(std::vector<double> SampledValues, std::vector<double> MMXUData, double svTime, bool PTOC1StrGen, bool PTOC1StrPhA, bool PTOC1StrPhB, bool PTOC1StrPhC, bool PTOC1OpGen, bool PTOC2StrGen, bool PTOC2StrPhA, bool PTOC2StrPhB, bool PTOC2StrPhC, bool PTOC2OpGen, bool PTRCTrip)
 { // Метод регистрации данных
     RADR1.catchAnalogValue(SampledValues[0], svTime);
     RADR2.catchAnalogValue(SampledValues[1], svTime);
@@ -65,7 +64,7 @@ void DR::registerData(vector<double> SampledValues, vector<double> MMXUData, dou
     RBDR11.catchDiscreteSignal(PTRCTrip, svTime);
 }
 
-void DR::registerOtherData(vector<double> MMXUData_, double svTime)
+void DR::registerOtherData(std::vector<double> MMXUData_, double svTime)
 {
     RADR_otherA.catchAnalogValue(MMXUData_[0], svTime);
     RADR_otherB.catchAnalogValue(MMXUData_[1], svTime);
@@ -104,7 +103,7 @@ static void write_xy_dat(const std::string &path,
         out << x[i] << " " << static_cast<double>(y[i]) << "\n";
 }
 
-void DR::exportForGnuplot(const ParserComtrade &parser, const string &filename)
+void DR::exportForGnuplot(const ParserComtrade &parser, const std::string &filename)
 {
     std::ofstream out(filename);
     if (!out.is_open())
@@ -147,9 +146,9 @@ void DR::exportForGnuplot(const ParserComtrade &parser, const string &filename)
     std::cout << "Data for gnuplot save in " << filename << std::endl;
 }
 
-void DR::showPlot(string dataFile_, string plotscript_file_, string pngFile_)
+void DR::showPlot(std::string dataFile_, std::string plotscript_file_, std::string pngFile_)
 {
-    ofstream gp(plotscript_file_);
+    std::ofstream gp(plotscript_file_);
     // Создаем огромную картинку 3000x1600 пикселей
     gp << "set terminal pngcairo size 4000, 3600 font 'Verdana,12'\n";
     gp << "set output '" << pngFile_ << "'\n";
@@ -241,9 +240,9 @@ void DR::showPlot(string dataFile_, string plotscript_file_, string pngFile_)
     gp << "unset multiplot\n";
     gp.close();
 
-    string gnuplotCmd = "gnuplot " + plotscript_file_;
+    std::string gnuplotCmd = "gnuplot " + plotscript_file_;
     system(gnuplotCmd.c_str());
     // Автоматически открываем готовую картинку в Windows
-    string pngCmd = "start  " + pngFile_;
+    std::string pngCmd = "start  " + pngFile_;
     system(pngCmd.c_str());
 }
