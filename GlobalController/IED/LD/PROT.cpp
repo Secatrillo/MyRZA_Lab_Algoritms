@@ -34,19 +34,20 @@ void PROT::imitateRP(double timedat)
     PTOC2.checkReturn();
     PTOC1.checkTimeStr(timedat);
     PTOC2.checkTimeStr(timedat);
-    if (PTOC1.Op->general->getvalue() == 1)
-    {
-        PTOC2.Op->general->setvalue(0);
-        PTOC2.Str->general->setvalue(0);
-        PTOC2.Str->phsA->setvalue(0);
-        PTOC2.Str->phsB->setvalue(0);
-        PTOC2.Str->phsC->setvalue(0);
-    }
+    // if (PTOC1.Op->general->getvalue() == 1)
+    // {
+    //     PTOC2.Op->general->setvalue(0);
+    //     PTOC2.Str->general->setvalue(0);
+    //     PTOC2.Str->phsA->setvalue(0);
+    //     PTOC2.Str->phsB->setvalue(0);
+    //     PTOC2.Str->phsC->setvalue(0);
+    // }
     
     
     // создаем локальный вектор перед вызовом
     
     PTRC1.formTrip({ PTOC1.Op, PTOC2.Op });
+    
 }
 
 

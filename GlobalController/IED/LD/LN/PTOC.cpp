@@ -16,7 +16,7 @@ void PTOC::setStrVal(double strVal) {
 }
 
 void PTOC::setOpDlTmms(double opDlTmms) {
-    OpDlTmms->setVal->setvalue(static_cast<int32_t>(opDlTmms));
+    OpDlTmms->setVal->setvalue(static_cast<int32_t>(opDlTmms*1e3));
 }
 
 void PTOC::acceptDataFromMSQI(std::shared_ptr<CMV> data) {
@@ -28,12 +28,12 @@ void PTOC::checkStr(double timedat) {
     if (!A) return;   
 
     if (A->cVal->getMag() > StrVal->setMag->f->getvalue()) {
-        if (!Str->general) {
+        if (!Str->general->getvalue()) {
             Str->general->setvalue(true);
             tStr = timedat;          
         }
     } else {
-        if (Str->general) {
+        if (Str->general->getvalue()) {
             Str->general->setvalue(false);
             Op->general->setvalue(false);   
         }
@@ -59,8 +59,8 @@ void PTOC::checkTimeStr(double timedat) {
     double elapsed = timedat - tStr;
     int32_t delayMs = OpDlTmms->setVal->getvalue();
 
-    if (elapsed >= delayMs && delayMs > 0) {
+    if (elapsed*1e3 >= delayMs && delayMs > 0) {
         // Время выдержки истекло — действуем на отключение
-        Op->general->getvalue();
+        Op->general->setvalue(1);
     }
 }

@@ -19,6 +19,9 @@ public:
     RADR RADR4;
     RADR RADR5;
     RADR RADR6;
+    RADR RADR7;
+    RADR RADR8;
+    RADR RADR9;
     RADR RADR_otherA;
     RADR RADR_otherB;
     RADR RADR_otherC;
@@ -34,6 +37,7 @@ public:
     RBDR RBDR9;
     RBDR RBDR10;
     RBDR RBDR11;
+    RBDR RBDR12;
 
     std::vector<RADR*> RADRch;
     std::vector<RBDR*> RBDRch;
@@ -41,6 +45,7 @@ public:
     DR(std::string LDName_);
     void registerData(  std::shared_ptr< std::vector<double>> SampledValues,
                         std::vector<double> MMXUData,
+                        std::vector<double> MSQIData,
                         double svTime,
                         bool PTOC1StrGen,
                         bool PTOC1StrPhA, 
@@ -52,7 +57,8 @@ public:
                         bool PTOC2StrPhB, 
                         bool PTOC2StrPhC, 
                         bool PTOC2OpGen, 
-                        bool PTRCTrip);
+                        bool PTRCTrip,
+                        bool BreakerClosed);
     void registerOtherData(std::vector<double> MMXUData_, double svTime);
     void exportForGnuplot(const ParserComtrade& parser, const std::string& filename);
     void showPlot(std::string dataFile_, std::string plotscript_file_, std::string pngFile_);

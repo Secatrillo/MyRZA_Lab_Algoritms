@@ -64,7 +64,7 @@ void Fourier::calculateFourier(std::shared_ptr<std::vector<double>> mas, std::sh
             mag += std::pow(mas->at(i),2);
         }
         vec->setMag(sqrt(mag/N));
-        vec->setAng(ang);
+        vec->setAng(ang/180 * M_PI);
         
     }
 

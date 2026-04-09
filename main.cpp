@@ -4,8 +4,8 @@
 int main()
 {
     IED ied1("MTZ1");
-    std::string cfg_file1 = "End_line/K3_1.cfg";
-    std::string dat_file1 = "End_line/K3_1.dat";
+    std::string cfg_file1 = "Test1/K3_1.cfg";
+    std::string dat_file1 = "Test1/K3_1.dat";
     std::string output_file1 = "output1.txt";
     std::string plotscript_file1 = "plotscript1.gp";
     std::string png_file1 = "png1.png";
@@ -17,7 +17,7 @@ int main()
         const auto &currentsC = parser1.getChannelData(2);
         int count1 = 0;
 
-        ied1.setSettings(10000, 0.1, 2000, 0.6, true, 4000);
+        ied1.setSettings(100, 0.3, 20, 0.6, true, 4000);
         // Прогоняем все выборки через IED, чтобы DR заполнил данные
         for (size_t i = 0; i < times.size(); ++i)
         {

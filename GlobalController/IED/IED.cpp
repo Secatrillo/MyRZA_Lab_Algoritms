@@ -37,9 +37,14 @@ void IED::modelIEDWork(std::shared_ptr<std::vector<double>> SVMessage, double ti
         meas.MMXU1.A->phsC->cVal->getMag()
     };
     
-    MMXUData = MMXUmeas;
+    std::vector<double> MSQImeas = {
+        meas.MSQI1.PositiveSeq->cVal->getMag(),
+        meas.MSQI1.NegativeSeq->cVal->getMag(),
+        meas.MSQI1.ZeroSeq->cVal->getMag()
+    };
 
-    dr.registerData(SVMessage, MMXUmeas, timeValues, 
+
+    dr.registerData(SVMessage, MMXUmeas, MSQImeas ,  timeValues, 
     prot.PTOC1.Str->general->getvalue(),
     prot.PTOC1.Str->phsA->getvalue(),
     prot.PTOC1.Str->phsB->getvalue(),
@@ -50,7 +55,8 @@ void IED::modelIEDWork(std::shared_ptr<std::vector<double>> SVMessage, double ti
     prot.PTOC2.Str->phsB->getvalue(),
     prot.PTOC2.Str->phsC->getvalue(),
     prot.PTOC2.Op->general->getvalue(),
-    prot.PTRC1.Tr->general->getvalue());
+    prot.PTRC1.Tr->general->getvalue(),
+    ctrl.XCBR1.Pos->stVal->getvalue());
 }
 
 std::vector<double> IED::IEDAntireciverData()

@@ -36,9 +36,9 @@ void MEAS::calculateFourier()
 
 void MEAS::sendFourierDataToMMXU()
 { //Передача выхода фильтра Фурье в логический узел измерений
-    MMXU1.A->phsA->cVal->setMag(Fourier1.fourierA->cVal->getMag());
-    MMXU1.A->phsB->cVal->setMag(Fourier1.fourierB->cVal->getMag());
-    MMXU1.A->phsC->cVal->setMag(Fourier1.fourierC->cVal->getMag());
+    MMXU1.A->phsA->set_cVal(Fourier1.fourierA->get_cVal());
+    MMXU1.A->phsB->set_cVal(Fourier1.fourierB->get_cVal());
+    MMXU1.A->phsC->set_cVal(Fourier1.fourierC->get_cVal());
 }
 
 void MEAS::sendMMXUDataToMSQI()
