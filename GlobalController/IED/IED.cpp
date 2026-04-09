@@ -24,6 +24,7 @@ void IED::modelIEDWork(std::shared_ptr<std::vector<double>> SVMessage, double ti
     meas.calculateFourier();
     meas.sendFourierDataToMMXU();
     meas.sendMMXUDataToMSQI();
+    meas.calculateSequenses();
     // 3. Передача данных в защиту
     prot.acceptDataFromMSQI(meas.MSQI1.ZeroSeq);
     prot.imitateRP(timeValues);

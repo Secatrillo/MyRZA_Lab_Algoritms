@@ -27,7 +27,7 @@ void Vector::setMag(double newValue){
 }
 
 double Vector::getMag() const{
-    return mag->getValue();
+    return mag->getvalue();
 }
 
 void Vector::setAng(double newValue){
@@ -35,5 +35,5 @@ void Vector::setAng(double newValue){
 }
 
 double Vector::getAng() const{
-    return ang->getValue();
+    return ang->getvalue();
 }

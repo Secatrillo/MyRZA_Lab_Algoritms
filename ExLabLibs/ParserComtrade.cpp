@@ -6,238 +6,192 @@
 #include <stdexcept>
 #include <cctype>
 #include <algorithm>
+#include <cstring>
+#include <iostream>
 
+using namespace std;
 
-
-ParserComtrade::ParserComtrade(const std::string& cfg_file_, const std::string& dat_file_) : cfg_file(move(cfg_file_)), dat_file(move(dat_file_))
+namespace
 {
-    //////////////////////////////////////////////////
-
-    std::ifstream cfg(cfg_file);
-    std::string line;
-
-    if (!cfg.is_open()) throw std::runtime_error("Could not open CFG file");
-
-    getline(cfg, line);
-    getline(cfg, line);
-
-    std::stringstream ss_count(line);
-    std::string tmp;
-    getline(ss_count, tmp, ',');
-    int total_ch = stoi(tmp);
-
-    for (int i = 0; i < total_ch; ++i)
-    {
-        getline(cfg, line);
-        if (line.find(",A") == std::string::npos && line.find(",P") == std::string::npos) continue;
-
-        std::stringstream ss(line);
-        std::vector<std::string> tokens;
-        while (getline(ss, tmp, ',')) tokens.push_back(tmp);
-
-        
-        analogChannels.push_back(AnalogChannel(stoi(tokens[0]),tokens[1],tokens[4],stod(tokens[5]),stod(tokens[6])));
-    }
-
-    analogData.resize(analogChannels.size());
-    
-    ////////////////////////////////////////////////////////////////
-    
-    std::ifstream dat(dat_file);
-    if (!dat.is_open()) throw std::runtime_error("Could not open DAT file");
-
-    while (getline(dat, line))
-    {
-        if(line.empty()) continue;
-        std::stringstream ss(line);
-        std::string tmp;
-
-        getline(ss, tmp, ',');
-
-        getline(ss, tmp, ',');
-        if (!tmp.empty())
-        {
-            double time_sec = stod(tmp)/1000000.0;
-            timeData.push_back(time_sec);
-        }
-        
-
-        for (int i = 0; i < analogChannels.size(); ++i)
-        {
-            getline(ss, tmp, ',');
-            if (!tmp.empty()) analogData[i].push_back((stod(tmp) * analogChannels[i].a) + analogChannels[i].b);
-           
-        }
-        total_samples++;
-    }
-    
-    // analog_count = parseAnalogCountFromCfg(cfg_file);
+string trimCopy(string s)
+{
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) { return !std::isspace(ch); }));
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(), s.end());
+    return s;
 }
 
-
-
-
-/*
-// trim helpers
-static inline void ltrim(std::string &s)
-{
-    s.erase(s.begin(), std::find_if(s.begin(), s.end(),
-                               [](unsigned char ch)
-                               { return !std::isspace(ch); }));
-}
-static inline void rtrim(string &s)
-{
-    s.erase(std::find_if(s.rbegin(), s.rend(),
-                    [](unsigned char ch)
-                    { return !std::isspace(ch); })
-                .base(),
-            s.end());
-}
-static inline void trim(string &s)
-{
-    ltrim(s);
-    rtrim(s);
-}
-
-// split by comma OR whitespace (COMTRADE often comma-separated in cfg/dat)
-static vector<string> splitCsvOrWs(const string &line)
+vector<string> splitCsv(const string &line)
 {
     vector<string> out;
     string token;
-    bool hasComma = (line.find(',') != std::string::npos);
-
-    if (hasComma)
+    stringstream ss(line);
+    while (getline(ss, token, ','))
     {
-        stringstream ss(line);
-        while (getline(ss, token, ','))
-        {
-            trim(token);
-            out.push_back(token); // ← БЕЗ if (!token.empty())
-        }
-    }
-
-    else
-    {
-        stringstream ss(line);
-        while (ss >> token)
-            out.push_back(token);
+        out.push_back(trimCopy(token));
     }
     return out;
 }
+} // namespace
 
-int ParserComtrade::parseAnalogCountFromCfg(const string &cfgPath)
+static int32_t bytesToInt32(const unsigned char* bytes) {
+    return (int32_t)(bytes[0] | (bytes[1] << 8) | (bytes[2] << 16) | (bytes[3] << 24));
+}
+
+static int16_t bytesToInt16(const unsigned char* bytes) {
+    return (int16_t)(bytes[0] | (bytes[1] << 8));
+}
+
+ParserComtrade::ParserComtrade(const std::string& cfg_file_, const std::string& dat_file_)
+    : cfg_file(cfg_file_), dat_file(dat_file_), total_samples(0), analogCount(0), discreteCount(0), sampleRate(0), timeMultiplier(1.0)
 {
-    ifstream in(cfgPath);
-    if (!in)
-        throw logic_error("Cannot open cfg file: " + cfgPath);
+    ifstream cfg(cfg_file);
+    if (!cfg.is_open())
+        throw runtime_error("Could not open CFG file: " + cfg_file);
 
     string line;
+    // 1-я строка: станция, запись, год (пропускаем)
+    if (!getline(cfg, line))
+        throw runtime_error("Invalid CFG: missing first line");
+    
+    // 2-я строка: количество каналов, например "4,3A,1D"
+    if (!getline(cfg, line))
+        throw runtime_error("Invalid CFG: missing channel count line");
+    
+    auto chanTokens = splitCsv(line);
+    if (chanTokens.size() < 3)
+        throw runtime_error("Invalid CFG: channel count line must have 3 fields");
+    
+    string analogStr = chanTokens[1]; // "3A"
+    string discreteStr = chanTokens[2]; // "1D"
+    if (analogStr.empty() || discreteStr.empty())
+        throw runtime_error("Invalid CFG: empty channel type");
+    if (analogStr.back() != 'A' || discreteStr.back() != 'D')
+        throw runtime_error("Invalid CFG: channel type specifier must be A or D");
+    
+    analogStr.pop_back(); // удаляем 'A'
+    discreteStr.pop_back(); // удаляем 'D'
+    
+    analogCount = stoi(analogStr);
+    discreteCount = stoi(discreteStr);
+    
+    if (analogCount < 3)
+        throw runtime_error("CFG contains less than 3 analog channels");
 
-    getline(in, line); // 1 строка
-    if (!in)
-        throw logic_error("CFG: missing first line");
-
-    getline(in, line); // 2 строка
-    if (!in)
-        throw logic_error("CFG: missing channel count line");
-
-    auto parts = splitCsvOrWs(line);
-
-    int aCount = 0;
-
-    for (const auto &p : parts)
-    {
-        if (!p.empty() && (p.back() == 'A' || p.back() == 'a'))
-        {
-            string num = p.substr(0, p.size() - 1);
-            trim(num);
-            aCount = stoi(num);
-            break;
-        }
-    }
-
-    if (aCount <= 0)
-        throw logic_error("CFG: cannot parse analog channel count");
-
-    // 🔴 ВАЖНО: читаем строки аналоговых каналов
+    // Чтение аналоговых каналов
     analogChannels.clear();
-
-    for (int i = 0; i < aCount; ++i)
-    {
-        if (!getline(in, line))
-            throw logic_error("CFG: missing analog channel line");
-
-        auto cols = splitCsvOrWs(line);
-
-        if (cols.size() < 7)
-            throw logic_error("CFG: invalid analog channel line - expected at least 7 columns, got " + std::to_string(cols.size()));
-
+    for (int i = 0; i < analogCount; ++i) {
+        if (!getline(cfg, line))
+            throw runtime_error("CFG: missing analog channel line");
+        auto tokens = splitCsv(line);
+        if (tokens.size() < 7)
+            throw runtime_error("CFG: invalid analog channel line");
         AnalogChannel ch;
-        ch.index = stoi(cols[0]);
-        ch.name = cols[1];
-        ch.unit = cols[4];
-        ch.a = stod(cols[5]);
-        ch.b = stod(cols[6]);
-
+        ch.index = stoi(tokens[0]);
+        ch.name = tokens[1];
+        ch.unit = tokens[4];
+        ch.a = stod(tokens[5]);
+        ch.b = stod(tokens[6]);
         analogChannels.push_back(ch);
     }
 
-    return aCount;
-}
-
-vector<vector<double>> ParserComtrade::scan_comtrade()
-{
-    if (analog_count <= 0)
-        throw logic_error("Analog count is not initialized");
-
-    ifstream in(dat_file);
-    if (!in)
-        throw logic_error("Cannot open dat file: " + dat_file);
-
-    vector<vector<double>> channels(static_cast<size_t>(analog_count));
-    analogData.clear();
-    timeData.clear();
-
-    string line;
-    while (getline(in, line))
-    {
-        trim(line);
-        if (line.empty())
-            continue;
-
-        // Используем универсальный split
-        vector<string> cols = splitCsvOrWs(line);
-
-        if (static_cast<int>(cols.size()) < 2 + analog_count)
-        {
-            throw logic_error("DAT: line has too few columns: " + line);
-        }
-
-        // Время в секундах
-        double t = stod(cols[1]) / 1e6;
-        timeData.push_back(t);
-
-        if (analogChannels.size() != static_cast<size_t>(analog_count))
-        {
-            throw logic_error("CFG analog channels not initialized correctly");
-        }
-
-        // Аналоговые каналы
-        for (int ch = 0; ch < analog_count; ++ch)
-        {
-            double raw = stod(cols[2 + ch]);
-
-            double scaled = analogChannels[ch].a * raw + analogChannels[ch].b;
-
-            channels[ch].push_back(scaled);
-        }
+    // Пропускаем дискретные каналы
+    for (int i = 0; i < discreteCount; ++i) {
+        if (!getline(cfg, line))
+            throw runtime_error("CFG: missing discrete channel line");
     }
 
-    if (timeData.empty())
-        throw logic_error("Time data is empty");
+    // Строка частоты (например "50")
+    if (!getline(cfg, line))
+        throw runtime_error("CFG: missing sample rate line");
+    sampleRate = stod(line);
+    
+    // Строка множителя времени (обычно "1")
+    if (!getline(cfg, line))
+        throw runtime_error("CFG: missing time multiplier line");
+    // не используем, но читаем
+    double timeMul = stod(line);
+    
+    // Строка "4000,60001" – коэффициенты времени (пропускаем)
+    if (!getline(cfg, line))
+        throw runtime_error("CFG: missing time factors line");
+    
+    // Строка даты и времени начала записи
+    if (!getline(cfg, line))
+        throw runtime_error("CFG: missing start date/time line");
+    // Строка даты и времени окончания записи
+    if (!getline(cfg, line))
+        throw runtime_error("CFG: missing end date/time line");
+    
+    // Строка формата данных: "BINARY" или "ASCII"
+    if (!getline(cfg, line))
+        throw runtime_error("CFG: missing data format line");
+    string format = line;
+    if (format != "BINARY")
+        throw runtime_error("Only BINARY format is supported in this parser");
 
-    analogData = channels;
-    return channels;
+    // Чтение бинарного DAT-файла
+    readBinaryData();
 }
 
-*/
+void ParserComtrade::readBinaryData()
+{
+    std::ifstream dat(dat_file, std::ios::binary);
+    if (!dat.is_open())
+        throw runtime_error("Could not open DAT file: " + dat_file);
+
+    const int SAMPLE_NUM_BYTES = 4;   // номер образца (int32)
+    const int TIME_BYTES = 4;         // время в микросекундах (int32)
+    const int ANALOG_BYTES_PER_CH = 2; // int16
+    const int DISCRETE_BYTES = 2;     // упакованные дискретные сигналы (2 байта)
+
+    const int expectedSize = SAMPLE_NUM_BYTES + TIME_BYTES + analogCount * ANALOG_BYTES_PER_CH + DISCRETE_BYTES;
+
+    unsigned char* buffer = new unsigned char[expectedSize];
+    analogData.assign(analogCount, std::vector<double>());
+    timeData.clear();
+    total_samples = 0;
+
+    while (dat.read(reinterpret_cast<char*>(buffer), expectedSize)) {
+        // Номер образца (не используем)
+        // int32_t sampleNum = bytesToInt32(buffer);
+        // Время в микросекундах
+        int32_t timeMicro = bytesToInt32(buffer + 4);
+        double timeSec = timeMicro / 1000000.0;
+        timeData.push_back(timeSec);
+
+        // Аналоговые каналы
+        for (int i = 0; i < analogCount; ++i) {
+            int16_t raw = bytesToInt16(buffer + 4 + 4 + i * 2);
+            double realVal = raw * analogChannels[i].a + analogChannels[i].b;
+            analogData[i].push_back(realVal);
+        }
+        total_samples++;
+    }
+
+    delete[] buffer;
+
+    if (total_samples == 0)
+        throw runtime_error("DAT contains no valid samples");
+
+    // Отладочный вывод
+    cout << "DEBUG Parser: total_samples = " << total_samples << endl;
+    cout << "DEBUG Parser: timeData.size() = " << timeData.size() << endl;
+    for (size_t i = 0; i < analogData.size(); ++i)
+        cout << "DEBUG Parser: analogData[" << i << "].size() = " << analogData[i].size() << endl;
+}
+
+const std::vector<double>& ParserComtrade::getChannelData(int idx) const {
+    return analogData.at(static_cast<size_t>(idx));
+}
+
+size_t ParserComtrade::getChannelCount() const {
+    return analogData.size();
+}
+
+int ParserComtrade::getSamplesCount() const {
+    return total_samples;
+}
+
+const std::vector<double>& ParserComtrade::getTimeData() const {
+    return timeData;
+}

@@ -117,7 +117,7 @@ void DR::exportForGnuplot(const ParserComtrade &parser, const std::string &filen
     // Заголовок (необязательно, gnuplot его проигнорирует, если перед ним #)
     out << "# Time\tPhaseA\tPhaseB\tPhaseC" << std::endl;
 
-    for (size_t i = 0; i < time.size(); i += 1)
+    for (size_t i = 0; i < time.size(); i++)
     {
         out << std::fixed << std::setprecision(6)
             << time[i] << "\t"
@@ -137,10 +137,11 @@ void DR::exportForGnuplot(const ParserComtrade &parser, const std::string &filen
             << RBDR9.ChData[i] << "\t"
             << RBDR5.ChData[i] << "\t"
             << RBDR10.ChData[i] << "\t"
-            << RBDR11.ChData[i] << "\t"
-            << RADR_otherA.ChData[i] << "\t"
-            << RADR_otherB.ChData[i] << "\t"
-            << RADR_otherC.ChData[i] << "\n";
+            << RBDR11.ChData[i] << "\n"
+            // << RADR_otherA.ChData[i] << "\t"
+            // << RADR_otherB.ChData[i] << "\t"
+            // << RADR_otherC.ChData[i] << "\n"
+            ;
     }
     out.close();
     std::cout << "Data for gnuplot save in " << filename << std::endl;

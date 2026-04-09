@@ -12,18 +12,18 @@ MSQI::MSQI(std::string LogicalNodeName_, std::string LogicalDeviceRef_)
 
 void MSQI::Calculate(){
     std::complex PS = A->phsA->cVal->getMag()*pow(M_E,1i * A->phsA->cVal->getAng()) 
-                    + A->phsA->cVal->getMag()*pow(M_E,1i * A->phsA->cVal->getAng()) * pow(M_E,1i* 120.0)
-                    + A->phsA->cVal->getMag()*pow(M_E,1i * A->phsA->cVal->getAng()) * pow(M_E,1i*-120.0);
+                    + A->phsB->cVal->getMag()*pow(M_E,1i * A->phsB->cVal->getAng()) * pow(M_E,1i* (2.0/3)*M_PI)
+                    + A->phsC->cVal->getMag()*pow(M_E,1i * A->phsC->cVal->getAng()) * pow(M_E,1i*-(2.0/3)*M_PI);
     PositiveSeq->cVal->setMag(abs(PS));
     PositiveSeq->cVal->setMag(arg(PS));
     std::complex NS = A->phsA->cVal->getMag()*pow(M_E,1i * A->phsA->cVal->getAng()) 
-                    + A->phsA->cVal->getMag()*pow(M_E,1i * A->phsA->cVal->getAng()) * pow(M_E,1i*-120.0)
-                    + A->phsA->cVal->getMag()*pow(M_E,1i * A->phsA->cVal->getAng()) * pow(M_E,1i* 120.0);
+                    + A->phsB->cVal->getMag()*pow(M_E,1i * A->phsB->cVal->getAng()) * pow(M_E,1i*-(2.0/3)*M_PI)
+                    + A->phsC->cVal->getMag()*pow(M_E,1i * A->phsC->cVal->getAng()) * pow(M_E,1i* (2.0/3)*M_PI);
     NegativeSeq->cVal->setMag(abs(NS));
     NegativeSeq->cVal->setMag(arg(NS));
     std::complex ZS = A->phsA->cVal->getMag()*pow(M_E,1i * A->phsA->cVal->getAng()) 
-                    + A->phsA->cVal->getMag()*pow(M_E,1i * A->phsA->cVal->getAng()) 
-                    + A->phsA->cVal->getMag()*pow(M_E,1i * A->phsA->cVal->getAng());
+                    + A->phsB->cVal->getMag()*pow(M_E,1i * A->phsB->cVal->getAng()) 
+                    + A->phsC->cVal->getMag()*pow(M_E,1i * A->phsC->cVal->getAng());
     ZeroSeq->cVal->setMag(abs(ZS));
     ZeroSeq->cVal->setMag(arg(ZS));
 }

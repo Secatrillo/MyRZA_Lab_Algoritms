@@ -8,9 +8,9 @@ LSVS::LSVS(std::string LogicalNodeName_ , std::string LogicalDeviceRef_ ):
     {}
 
 void LSVS::acceptIncomingSV(std::shared_ptr<std::vector<double>> svMessage){
-    for(int i = 0; i < svMessage->size(); i++){
-        currentA->setInstMag(svMessage->at(i));
-    }
+    currentA->setInstMag(svMessage->at(0));
+    currentB->setInstMag(svMessage->at(1));
+    currentC->setInstMag(svMessage->at(2));
 }
 
 // std::array<std::shared_ptr<SAV>,3> LSVS::sendSampledValues(){

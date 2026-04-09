@@ -11,20 +11,22 @@ Fourier::Fourier(std::string LogicalNodeName_, std::string LogicalDeviceRef_)
       masC(std::make_shared<std::vector<double>>()),
       fourierA(std::make_shared<CMV>("Действующий ток А", false, this->getLNRef())),
       fourierB(std::make_shared<CMV>("Действующий ток В", false, this->getLNRef())),
-      fourierC(std::make_shared<CMV>("Действующий ток С", false, this->getLNRef()))
+      fourierC(std::make_shared<CMV>("Действующий ток С", false, this->getLNRef())),
+      mode(std::make_shared<SPS>("Режим Фильтра",this->getLNRef(),false))
       {}
 
 void Fourier::recieveSampledValues(const double& currentA_, const double& currentB_, const double& currentC_){
     currentA->setInstMag(currentA_);
     currentB->setInstMag(currentB_);
     currentC->setInstMag(currentC_);
+    unpackSampledValues();
 }
 
 void Fourier::unpackSampledValues(){
     if(masA->size() == N){
-        std::shared_ptr<Vector> A = std::shared_ptr<Vector>(); 
-        std::shared_ptr<Vector> B = std::shared_ptr<Vector>();
-        std::shared_ptr<Vector> C = std::shared_ptr<Vector>();
+        std::shared_ptr<Vector> A = std::make_shared<Vector>("cVal", EnumFunctionalConstraints::MX, TriggerOption(true,false,true), this->getLNRef()); 
+        std::shared_ptr<Vector> B = std::make_shared<Vector>("cVal", EnumFunctionalConstraints::MX, TriggerOption(true,false,true), this->getLNRef());
+        std::shared_ptr<Vector> C = std::make_shared<Vector>("cVal", EnumFunctionalConstraints::MX, TriggerOption(true,false,true), this->getLNRef());
 
 
         calculateFourier(masA, A,    0);
@@ -32,7 +34,7 @@ void Fourier::unpackSampledValues(){
         calculateFourier(masC, C,  120);
 
         fourierA->set_cVal(*A);
-        fourierC->set_cVal(*B);
+        fourierB->set_cVal(*B);
         fourierC->set_cVal(*C);
 
         masA->clear();
@@ -49,8 +51,8 @@ void Fourier::calculateFourier(std::shared_ptr<std::vector<double>> mas, std::sh
         double Fx = 0;
         double Fy = 0;
         for(int i = 0; i < N; i++){
-            Fx += mas->at(i)*sin(2*M_PI*freq*(i+1)/N);
-            Fy += mas->at(i)*cos(2*M_PI*freq*(i+1)/N);
+            Fx += mas->at(i)*sin(2*M_PI*(i+1.0)/N);
+            Fy += mas->at(i)*cos(2*M_PI*(i+1.0)/N);
         }
         Fx *= 2.0/N;
         Fy *= 2.0/N;

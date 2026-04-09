@@ -32,7 +32,7 @@ void AnalogValue::setNewValue(double newValue){
 }
 
 //Метод для получения значения атрибута
-double AnalogValue::getValue(){
+double AnalogValue::getvalue(){
     return f->getvalue();
 }
 

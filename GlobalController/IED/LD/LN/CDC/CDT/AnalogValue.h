@@ -13,6 +13,6 @@ class AnalogValue: public GenDataAttributeClass {
         AnalogValue(std::string DataAttributeName_, EnumFunctionalConstraints FunctionalConstraint_,TriggerOption TrgOp_, std::string DataObjectRef_);
 
         void setNewValue(double newValue);
-        double getValue();
+        double getvalue();
 };
 

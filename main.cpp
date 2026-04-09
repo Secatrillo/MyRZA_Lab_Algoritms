@@ -4,8 +4,8 @@
 int main()
 {
     IED ied1("MTZ1");
-    std::string cfg_file1 = "Test1/BRK1.cfg";
-    std::string dat_file1 = "Test1/BRK1.dat";
+    std::string cfg_file1 = "End_line/K3_1.cfg";
+    std::string dat_file1 = "End_line/K3_1.dat";
     std::string output_file1 = "output1.txt";
     std::string plotscript_file1 = "plotscript1.gp";
     std::string png_file1 = "png1.png";

@@ -18,7 +18,7 @@ public:
     std::shared_ptr<SAV> currentC;
 
     std::shared_ptr<SPS> mode;
-    int N;
+    int N = 80;
     double freq = 50;
     
     // int N=80;

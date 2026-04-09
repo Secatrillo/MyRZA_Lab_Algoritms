@@ -2,7 +2,7 @@
 
 PTRC::PTRC(std::string LogicalNodeName_, std::string LogicalDeviceRef_):
     GenLogicalNodeClass(LogicalNodeName_,LogicalDeviceRef_),
-    Tr(nullptr)
+    Tr(std::make_shared<ACT>("Срабатывание МТЗ",this->getLNRef(),false))
     {}
 
 void PTRC::formTrip(std::vector<std::shared_ptr<ACT>> Trip_vec){

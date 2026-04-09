@@ -17,7 +17,7 @@ public:
 
     MEAS(std::string LDName_);
     void acceptSV(std::shared_ptr<std::vector<double>> sv);
-    void setFourierMode(bool& mode, int& discrit);
+    void setFourierMode(bool mode, int discrit);
     void calculateFourier();
     void sendFourierDataToMMXU();
     void sendLSVSDataToMMXU();

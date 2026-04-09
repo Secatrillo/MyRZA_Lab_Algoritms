@@ -12,7 +12,7 @@ MSQI1("MSQI1","MSQI")
 {
 }
 
-void MEAS::setFourierMode(bool& isFourier, int& discrit){
+void MEAS::setFourierMode(bool isFourier, int discrit){
     Fourier1.mode->stVal->setvalue(isFourier);
 }
 
@@ -44,8 +44,8 @@ void MEAS::sendFourierDataToMMXU()
 void MEAS::sendMMXUDataToMSQI()
 { //Передача выхода фильтра Фурье в логический узел рассчёта последовательностей
     MSQI1.A->phsA->set_cVal(MMXU1.A->phsA->get_cVal());
-    MMXU1.A->phsB->set_cVal(MMXU1.A->phsB->get_cVal());
-    MMXU1.A->phsC->set_cVal(MMXU1.A->phsC->get_cVal());
+    MSQI1.A->phsB->set_cVal(MMXU1.A->phsB->get_cVal());
+    MSQI1.A->phsC->set_cVal(MMXU1.A->phsC->get_cVal());
 }
 
 void MEAS::calculateSequenses()
