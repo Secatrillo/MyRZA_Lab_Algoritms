@@ -41,6 +41,8 @@ static int16_t bytesToInt16(const unsigned char* bytes) {
     return (int16_t)(bytes[0] | (bytes[1] << 8));
 }
 
+ParserComtrade::ParserComtrade(const std::pair<std::string,std::string>& files ): ParserComtrade(files.first,files.second){}
+
 ParserComtrade::ParserComtrade(const std::string& cfg_file_, const std::string& dat_file_)
     : cfg_file(cfg_file_), dat_file(dat_file_), total_samples(0), analogCount(0), discreteCount(0), sampleRate(0), timeMultiplier(1.0)
 {
@@ -184,6 +186,10 @@ const std::vector<double>& ParserComtrade::getChannelData(int idx) const {
     return analogData.at(static_cast<size_t>(idx));
 }
 
+const std::vector<std::vector<double>>& ParserComtrade::getAnalogData() const {
+    return analogData;
+}
+
 size_t ParserComtrade::getChannelCount() const {
     return analogData.size();
 }
@@ -194,4 +200,8 @@ int ParserComtrade::getSamplesCount() const {
 
 const std::vector<double>& ParserComtrade::getTimeData() const {
     return timeData;
+}
+
+int ParserComtrade::getTimeDataSize(){
+    return timeData.size();
 }

@@ -7,10 +7,14 @@ LSVS::LSVS(std::string LogicalNodeName_ , std::string LogicalDeviceRef_ ):
     currentC(std::make_unique<SAV>("Мгновенный ток С", LogicalNodeName_ , false))
     {}
 
-void LSVS::acceptIncomingSV(std::shared_ptr<std::vector<double>> svMessage){
-    currentA->setInstMag(svMessage->at(0));
-    currentB->setInstMag(svMessage->at(1));
-    currentC->setInstMag(svMessage->at(2));
+void LSVS::acceptIncomingSV(int& i){
+    currentA->setInstMag(analogData->at(0).at(i));
+    currentB->setInstMag(analogData->at(1).at(i));
+    currentC->setInstMag(analogData->at(2).at(i));
+}
+
+void LSVS::setParserData(std::shared_ptr<ParserComtrade> parserData){
+    analogData = std::make_unique<std::vector<std::vector<double>>>(parserData->getAnalogData());
 }
 
 // std::array<std::shared_ptr<SAV>,3> LSVS::sendSampledValues(){

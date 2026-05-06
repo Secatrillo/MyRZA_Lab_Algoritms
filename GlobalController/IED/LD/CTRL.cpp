@@ -12,6 +12,10 @@ XCBR1("XCBR1", LDName_)
 void CTRL::receiveTripSignal(std::shared_ptr<ACT> TripSignal)
 { //Получение сигнала TRIP из логического устройства защиты
     CSWI1.receiveTrip(TripSignal);
+    CSWI1.Pos = XCBR1.Pos;
+}
+
+void CTRL::actOnSignal()
+{ //Получение сигнала TRIP из логического устройства защиты
     XCBR1.actOnOpen(CSWI1.OpOpn);
-    CSWI1.Pos->stVal->setvalue(XCBR1.Pos->stVal->getvalue());
 }

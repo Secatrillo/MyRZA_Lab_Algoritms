@@ -2,26 +2,39 @@
 
 #include "LD/PROT.h"
 #include "LD/CTRL.h"
-#include "LD/DR.h"
 #include "LD/MEAS.h"
 #include "../../include.h"
-#include "../../ExLabLibs/ParserComtrade.h"
+#include <IEDSettings.h>
+#include "IEDTelemetry.h"
+#include <ParserComtrade.h>
+#include <memory>
+#include <string>
+#include <vector>
 
 class IED {
-    public:
-        IED(std::string IEDName_);
-        void setSettings(double StrValPTOC1, double OpDlTmmsPTOC1, double StrValPTOC2, double OpDlTmmsPTOC2, bool FourierMode, int discrit);
-        void modelIEDWork(std::shared_ptr<std::vector<double>> SVMessage, double timeValues);
-        void watchOscill(ParserComtrade parser_, std::string filename_, std::string plotscriptFile_, std::string pngFile_);
-        std::vector<double> IEDAntireciverData();
-        void IEDReciverData(double timeValues, std::vector<double> MMXUOtherMeas);
+public:
+    IED(std::string IEDName_);
 
-    private:
-        std::string IEDName;
-        MEAS meas;
-        PROT prot;
-        CTRL ctrl;
-        DR dr;
-        std::vector<double> MMXUData;
+    void setSettings(std::shared_ptr<Settings> settings);
+
+    void bindPSCHLocal();
+    void connectPSCHRemote();
+
+    void IEDInitDataTransfer();
+    void modelIEDWork(int& counter);
+
+private:
+    void sendTelemetrySample(int sampleIndex);
+
+    /** Collects all channels for this tick; extend by appending graphs/lines here. */
+    IEDTelemetryFrame buildTelemetryFrame(int sampleIndex) const;
+
+    std::string IEDName;
+    std::string remoteName;
+    MEAS meas;
+    PROT prot;
+    CTRL ctrl;
+    std::shared_ptr<zmq::context_t> context;
+    std::shared_ptr<ParserComtrade> parser;
+    std::unique_ptr<zmq::socket_t> telemetryPush;
 };
-

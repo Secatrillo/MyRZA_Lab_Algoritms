@@ -13,5 +13,6 @@ public:
     XCBR XCBR1;
     CTRL(std::string LDName_);
     void receiveTripSignal(std::shared_ptr<ACT> TripSignal);
+    void actOnSignal();
 };
 

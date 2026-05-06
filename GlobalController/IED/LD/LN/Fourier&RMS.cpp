@@ -23,15 +23,19 @@ void Fourier::recieveSampledValues(const double& currentA_, const double& curren
 }
 
 void Fourier::unpackSampledValues(){
+    masA->push_back(currentA->getInstMag());
+    masB->push_back(currentB->getInstMag());
+    masC->push_back(currentC->getInstMag());
+
     if(masA->size() == N){
         std::shared_ptr<Vector> A = std::make_shared<Vector>("cVal", EnumFunctionalConstraints::MX, TriggerOption(true,false,true), this->getLNRef()); 
         std::shared_ptr<Vector> B = std::make_shared<Vector>("cVal", EnumFunctionalConstraints::MX, TriggerOption(true,false,true), this->getLNRef());
         std::shared_ptr<Vector> C = std::make_shared<Vector>("cVal", EnumFunctionalConstraints::MX, TriggerOption(true,false,true), this->getLNRef());
 
 
-        calculateFourier(masA, A,    0);
-        calculateFourier(masB, B, -120);
-        calculateFourier(masC, C,  120);
+        calculateFourier(masA, A,    0, PhaseA);
+        calculateFourier(masB, B, -120, PhaseB);
+        calculateFourier(masC, C,  120, PhaseC);
 
         fourierA->set_cVal(*A);
         fourierB->set_cVal(*B);
@@ -41,30 +45,34 @@ void Fourier::unpackSampledValues(){
         masB->clear();
         masC->clear();
     }
-    masA->push_back(currentA->getInstMag());
-    masB->push_back(currentB->getInstMag());
-    masC->push_back(currentC->getInstMag());
 }
+    
 
-void Fourier::calculateFourier(std::shared_ptr<std::vector<double>> mas, std::shared_ptr<Vector> vec, double ang){
+void Fourier::calculateFourier(std::shared_ptr<std::vector<double>> mas, std::shared_ptr<Vector> vec, double ang, PhaseTag phase){
     if (mode){
-        double Fx = 0;
-        double Fy = 0;
+        double Fx_ = 0;
+        double Fy_ = 0;
         for(int i = 0; i < N; i++){
-            Fx += mas->at(i)*sin(2*M_PI*(i+1.0)/N);
-            Fy += mas->at(i)*cos(2*M_PI*(i+1.0)/N);
+            Fx_ += mas->at(i)*sin(2*M_PI*(i+1.0)/N);
+            Fy_ += mas->at(i)*cos(2*M_PI*(i+1.0)/N);
         }
-        Fx *= 2.0/N;
-        Fy *= 2.0/N;
-        vec->setMag(sqrt(Fx*Fx + Fy*Fy));
-        vec->setAng(atan2(Fy,Fx));
+        Fx_ *= 2.0/N;
+        Fy_ *= 2.0/N;
+        Fx[phase] = Fx_;
+        Fy[phase] = Fy_;
+        vec->setMag(sqrt(Fx_*Fx_ + Fy_*Fy_));
+        vec->setAng(atan2(Fy_,Fx_));
     } else {
         double mag = 0;
         for(int i = 0; i < N; i++){
             mag += std::pow(mas->at(i),2);
         }
-        vec->setMag(sqrt(mag/N));
-        vec->setAng(ang/180 * M_PI);
+        double rms = sqrt(mag/N);
+        double a = ang/180 * M_PI;
+        Fx[phase] = rms * cos(a);
+        Fy[phase] = rms * sin(a);
+        vec->setMag(rms);
+        vec->setAng(a);
         
     }
 

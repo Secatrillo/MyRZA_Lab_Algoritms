@@ -12,20 +12,25 @@ MSQI1("MSQI1","MSQI")
 {
 }
 
-void MEAS::setFourierMode(bool isFourier, int discrit){
+void MEAS::setSettings(bool isFourier, int discrit, std::shared_ptr<ParserComtrade> parser){
     Fourier1.mode->stVal->setvalue(isFourier);
+    LSVS1.setParserData(parser);
+
 }
 
-void MEAS::acceptSV(std::shared_ptr<std::vector<double>> sv)
+void MEAS::acceptSV(int& i)
 { //Метод приёма SV сообщения извне
-    LSVS1.acceptIncomingSV(sv);
+    LSVS1.acceptIncomingSV(i);
 }
 
 void MEAS::sendLSVSDataToMMXU()
 { //Передача мгновенных значений от LSVS1 в MMXU1
-    MMXU1.currentA->setInstMag(LSVS1.currentA->getInstMag()); 
-    MMXU1.currentB->setInstMag(LSVS1.currentB->getInstMag());
-    MMXU1.currentC->setInstMag(LSVS1.currentC->getInstMag());
+    // MMXU1.currentA->setInstMag(LSVS1.currentA->getInstMag()); 
+    // MMXU1.currentB->setInstMag(LSVS1.currentB->getInstMag());
+    // MMXU1.currentC->setInstMag(LSVS1.currentC->getInstMag());
+    MMXU1.currentA = LSVS1.currentA; 
+    MMXU1.currentB = LSVS1.currentB;
+    MMXU1.currentC = LSVS1.currentC;
 }
 
 void MEAS::calculateFourier()
@@ -36,16 +41,16 @@ void MEAS::calculateFourier()
 
 void MEAS::sendFourierDataToMMXU()
 { //Передача выхода фильтра Фурье в логический узел измерений
-    MMXU1.A->phsA->set_cVal(Fourier1.fourierA->get_cVal());
-    MMXU1.A->phsB->set_cVal(Fourier1.fourierB->get_cVal());
-    MMXU1.A->phsC->set_cVal(Fourier1.fourierC->get_cVal());
+    MMXU1.A->phsA = Fourier1.fourierA;
+    MMXU1.A->phsB = Fourier1.fourierB;
+    MMXU1.A->phsC = Fourier1.fourierC;
 }
 
 void MEAS::sendMMXUDataToMSQI()
 { //Передача выхода фильтра Фурье в логический узел рассчёта последовательностей
-    MSQI1.A->phsA->set_cVal(MMXU1.A->phsA->get_cVal());
-    MSQI1.A->phsB->set_cVal(MMXU1.A->phsB->get_cVal());
-    MSQI1.A->phsC->set_cVal(MMXU1.A->phsC->get_cVal());
+    MSQI1.A->phsA = MMXU1.A->phsA;
+    MSQI1.A->phsB = MMXU1.A->phsB;
+    MSQI1.A->phsC = MMXU1.A->phsC;
 }
 
 void MEAS::calculateSequenses()

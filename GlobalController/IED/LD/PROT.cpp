@@ -1,54 +1,74 @@
 #include "PROT.h"
-//Логическое устройство защиты
-//PTOC1 - Логический узел ТО без ВВ
-//PTOC2 - Логический узел ТО с ВВ (МТЗ)
-//PTRC1 - Логический узел формирования сигнала на отключение
-PROT::PROT(std::string LDName_):
-GenLogicalDeviceClass(LDName_),
-PTOC1("PTOC1", LDName_),
-PTOC2("PTOC2", LDName_),
-PTRC1("PTRC1", LDName_)
+
+PROT::PROT(std::string LDName_)
+    : GenLogicalDeviceClass(LDName_),
+      PIOC1("PIOC1", LDName_),
+      PIOC2("PIOC2", LDName_),
+      PSCH1("PSCH1", LDName_),
+      PTRC1("PTRC1", LDName_)
 {
 }
 
-void PROT::setSettings(double tmOpPTOC1, double currentOpPTOC1, double tmOpPTOC2, double currentOpPTOC2)
-{ //Метод задания уставок токовых защит
-    PTOC1.setStrVal(currentOpPTOC1);
-    PTOC1.setOpDlTmms(tmOpPTOC1);
-    PTOC2.setStrVal(currentOpPTOC2);
-    PTOC2.setOpDlTmms(tmOpPTOC2);
+void PROT::setSettings(double posStrVal, double posStrAng, double posTimeS,
+                       double negStrVal, double negStrAng, double negTimeS,
+                       double kman,
+                       double iManThr,
+                       std::shared_ptr<ParserComtrade> parser)
+{
+    PIOC1.setStrVal(posStrVal);
+    PIOC1.setStrAng(posStrAng);
+    PIOC1.setOpDlTmms(posTimeS);
+
+    PIOC2.setStrVal(negStrVal);
+    PIOC2.setStrAng(negStrAng);
+    PIOC2.setOpDlTmms(negTimeS);
+
+    PSCH1.setKman(kman);
+    PSCH1.setIManThr(iManThr);
+
+    times = std::make_shared<std::vector<double>>(parser->getTimeData());
 }
 
-void PROT::acceptDataFromMSQI(std::shared_ptr<CMV> data)
-{ //Приём данных от устройства измерений
-    PTOC1.acceptDataFromMSQI(data);
-    PTOC2.acceptDataFromMSQI(data);
+void PROT::acceptDataFromMSQI(std::shared_ptr<CMV> positiveSeq,
+                              std::shared_ptr<CMV> negativeSeq)
+{
+    PIOC1.acceptDataFromMSQI(positiveSeq);
+    PIOC2.acceptDataFromMSQI(negativeSeq);
 }
 
-
-void PROT::imitateRP(double timedat)
-{ //Имитация работы РЗ
-    PTOC1.checkStr(timedat);
-    PTOC2.checkStr(timedat);
-    PTOC1.checkReturn();
-    PTOC2.checkReturn();
-    PTOC1.checkTimeStr(timedat);
-    PTOC2.checkTimeStr(timedat);
-    // if (PTOC1.Op->general->getvalue() == 1)
-    // {
-    //     PTOC2.Op->general->setvalue(0);
-    //     PTOC2.Str->general->setvalue(0);
-    //     PTOC2.Str->phsA->setvalue(0);
-    //     PTOC2.Str->phsB->setvalue(0);
-    //     PTOC2.Str->phsC->setvalue(0);
-    // }
-    
-    
-    // создаем локальный вектор перед вызовом
-    
-    PTRC1.formTrip({ PTOC1.Op, PTOC2.Op });
-    
+void PROT::linkFourierToPSCH(Fourier& f)
+{
+    PSCH1.setSource(f);
 }
 
+void PROT::linkPSCHToPIOC()
+{
+    PIOC1.acceptBlock(PSCH1.Blk);
+    PIOC2.acceptBlock(PSCH1.Blk);
+}
 
+void PROT::bindPSCHLocal(zmq::context_t& ctx, const std::string& selfName)
+{
+    PSCH1.bindLocal(ctx, selfName);
+}
 
+void PROT::connectPSCHRemote(zmq::context_t& ctx, const std::string& remoteName)
+{
+    PSCH1.connectRemote(ctx, remoteName);
+}
+
+void PROT::imitateRP(int& timedat)
+{
+    const int idx = timedat;
+    const double t = times->at(timedat);
+
+    PSCH1.step();
+
+    PIOC1.checkStr(idx, t);
+    PIOC2.checkStr(idx, t);
+
+    PIOC1.checkTimeStr(idx, t);
+    PIOC2.checkTimeStr(idx, t);
+
+    PTRC1.formTrip({ PIOC1.Op, PIOC2.Op });
+}

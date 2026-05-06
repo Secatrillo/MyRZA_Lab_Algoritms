@@ -17,11 +17,14 @@ class ParserComtrade
 {
 public:
     ParserComtrade(const std::string& cfg_file, const std::string& dat_file);
+    ParserComtrade(const std::pair<std::string, std::string>& files);
 
     const std::vector<double>& getChannelData(int idx) const;
+    const std::vector<std::vector<double>>& getAnalogData() const;
     size_t getChannelCount() const;
     int getSamplesCount() const;
     const std::vector<double>& getTimeData() const;
+    int getTimeDataSize();
 
 private:
     std::string cfg_file;
