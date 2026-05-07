@@ -100,12 +100,17 @@ void PIOC::checkStr(int sampleIndex, double timedat)
         }
         /* PrevVec сохраняем — измеряем длительность относительно начала скачка. */
     } else {
-        PrevVec->cVal->setMag(curMag);
-        PrevVec->cVal->setAng(curAng);
-        if (Str->general->getvalue()) {
+        /* Гистерезис сброса пуска: при «дребезге» около уставки Str не гаснет одним тактом,
+           иначе OpDlTmms не успевает набраться (типично для второго конца линии / шумной осциллограммы). */
+        const bool magCalmed = (dMag < thrMag * 0.4);
+        const bool angCalmed = (dPhi < thrAng * 0.75) || (dMag < thrMag * 0.05);
+        if (!Str->general->getvalue()) {
+            PrevVec->cVal->setMag(curMag);
+            PrevVec->cVal->setAng(curAng);
+        } else if (magCalmed && angCalmed) {
+            PrevVec->cVal->setMag(curMag);
+            PrevVec->cVal->setAng(curAng);
             Str->general->setvalue(false);
-        }
-        if (Op->general->getvalue()) {
             Op->general->setvalue(false);
         }
     }

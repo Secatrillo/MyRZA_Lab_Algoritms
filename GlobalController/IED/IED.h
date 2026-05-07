@@ -1,5 +1,6 @@
 #pragma once
 
+#include "IedStepBarrier.h"
 #include "LD/PROT.h"
 #include "LD/CTRL.h"
 #include "LD/MEAS.h"
@@ -22,6 +23,8 @@ public:
 
     void IEDInitDataTransfer();
     void modelIEDWork(int& counter);
+    /** Синхронизация тактов между IED (одинаковый индекс выборки и t для PSCH). */
+    void setSimTickBarrier(std::shared_ptr<IedStepBarrier> b) { simTickBarrier = std::move(b); }
 
 private:
     void sendTelemetrySample(int sampleIndex);
@@ -37,4 +40,5 @@ private:
     std::shared_ptr<zmq::context_t> context;
     std::shared_ptr<ParserComtrade> parser;
     std::unique_ptr<zmq::socket_t> telemetryPush;
+    std::shared_ptr<IedStepBarrier> simTickBarrier;
 };

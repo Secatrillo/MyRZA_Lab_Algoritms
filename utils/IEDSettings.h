@@ -10,7 +10,8 @@ public:
     Settings(double posStrVal, double posStrAng, double posTimeS,
              double negStrVal, double negStrAng, double negTimeS,
              double kman,
-             double iManThr,
+             double pschOrZeroMinToUnblockS,
+             double pschOrOneReblockDelayS,
              bool fourierMode,
              int discrit,
              std::shared_ptr<ParserComtrade> parser,
@@ -23,7 +24,8 @@ public:
           negStrAng(negStrAng),
           negTimeS(negTimeS),
           kman(kman),
-          iManThr(iManThr),
+          pschOrZeroMinToUnblockS(pschOrZeroMinToUnblockS),
+          pschOrOneReblockDelayS(pschOrOneReblockDelayS),
           fourierMode(fourierMode),
           discrit(discrit),
           parser(std::move(parser)),
@@ -38,7 +40,10 @@ public:
     double getNegStrAng() const { return negStrAng; }
     double getNegTimeS() const { return negTimeS; }
     double getKman() const { return kman; }
-    double getIManThr() const { return iManThr; }
+    /** Мин. длительность (с), когда (local|remote)==0 по битам, чтобы снять Blk. */
+    double getPschOrZeroMinToUnblockS() const { return pschOrZeroMinToUnblockS; }
+    /** Выдержка (с) при OR==1 перед восстановлением Blk. */
+    double getPschOrOneReblockDelayS() const { return pschOrOneReblockDelayS; }
 
     bool getFourierMode() const { return fourierMode; }
     int  getDiscrit() const { return discrit; }
@@ -54,7 +59,8 @@ private:
     double negStrAng;
     double negTimeS;
     double kman;
-    double iManThr;
+    double pschOrZeroMinToUnblockS;
+    double pschOrOneReblockDelayS;
     bool fourierMode;
     int discrit;
     std::shared_ptr<ParserComtrade> parser;

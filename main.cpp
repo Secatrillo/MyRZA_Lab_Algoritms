@@ -1,17 +1,20 @@
 #include "GlobalController/IED/IED.h"
+#include "GlobalController/IED/IedStepBarrier.h"
 #include "include.h"
 
 #include <future>
-#include <mutex>
 
-#define POS_STR_VAL    700.0   // уставка по приращению модуля PositiveSeq, А
+#define POS_STR_VAL    50.0   // уставка по приращению модуля PositiveSeq, А
 #define POS_STR_ANG    0.5     // уставка по приращению угла PositiveSeq, рад
 #define POS_TIME_S     0.6    // выдержка PIOC1, c
-#define NEG_STR_VAL    700.0    // уставка по приращению модуля NegativeSeq, А
+#define NEG_STR_VAL    50.0    // уставка по приращению модуля NegativeSeq, А
 #define NEG_STR_ANG    0.5     // уставка по приращению угла NegativeSeq, рад
 #define NEG_TIME_S     0.25    // выдержка PIOC2, c
 #define KMAN           4.0     // коэффициент в формуле iман
-#define IMAN_THR       500.0   // уставка по току манипуляции
+/** Мин. время подряд, когда (local|remote) по битам == 0 (оба дискрета 0), чтобы снять Blk. */
+#define PSCH_OR_ZERO_MIN_TO_UNBLOCK_S 0.0005
+/** Выдержка при непрерывном «ИЛИ==1» перед восстановлением Blk. */
+#define PSCH_OR_ONE_REBLOCK_DELAY_S   0.015
 #define DISCRETIZATION 4000
 #define FOURIER_MODE   true
 
@@ -52,12 +55,12 @@ int main(int argc, char* argv[])
         ied1->setSettings(std::make_shared<Settings>(
             POS_STR_VAL, POS_STR_ANG, POS_TIME_S,
             NEG_STR_VAL, NEG_STR_ANG, NEG_TIME_S,
-            KMAN, IMAN_THR, FOURIER_MODE, DISCRETIZATION,
+            KMAN, PSCH_OR_ZERO_MIN_TO_UNBLOCK_S, PSCH_OR_ONE_REBLOCK_DELAY_S, FOURIER_MODE, DISCRETIZATION,
             parser1, context, name2));
         ied2->setSettings(std::make_shared<Settings>(
             POS_STR_VAL, POS_STR_ANG, POS_TIME_S,
             NEG_STR_VAL, NEG_STR_ANG, NEG_TIME_S,
-            KMAN, IMAN_THR, FOURIER_MODE, DISCRETIZATION,
+            KMAN, PSCH_OR_ZERO_MIN_TO_UNBLOCK_S, PSCH_OR_ONE_REBLOCK_DELAY_S, FOURIER_MODE, DISCRETIZATION,
             parser2, context, name1));
 
         py::scoped_interpreter guard{};
@@ -77,6 +80,10 @@ int main(int argc, char* argv[])
 
             
             
+
+            auto iedSimBarrier = std::make_shared<IedStepBarrier>(2u);
+            ied1->setSimTickBarrier(iedSimBarrier);
+            ied2->setSimTickBarrier(iedSimBarrier);
 
             for (auto& ied : {ied1, ied2}) {
                 ied->bindPSCHLocal();

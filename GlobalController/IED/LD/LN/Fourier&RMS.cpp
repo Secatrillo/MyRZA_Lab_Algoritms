@@ -41,9 +41,9 @@ void Fourier::unpackSampledValues(){
         fourierB->set_cVal(*B);
         fourierC->set_cVal(*C);
 
-        masA->clear();
-        masB->clear();
-        masC->clear();
+        masA->erase(masA->begin());
+        masB->erase(masB->begin());
+        masC->erase(masC->begin());
     }
 }
     

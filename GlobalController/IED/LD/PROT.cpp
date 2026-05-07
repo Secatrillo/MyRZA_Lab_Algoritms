@@ -12,7 +12,8 @@ PROT::PROT(std::string LDName_)
 void PROT::setSettings(double posStrVal, double posStrAng, double posTimeS,
                        double negStrVal, double negStrAng, double negTimeS,
                        double kman,
-                       double iManThr,
+                       double pschOrZeroMinToUnblockS,
+                       double pschOrOneReblockDelayS,
                        std::shared_ptr<ParserComtrade> parser)
 {
     PIOC1.setStrVal(posStrVal);
@@ -24,7 +25,7 @@ void PROT::setSettings(double posStrVal, double posStrAng, double posTimeS,
     PIOC2.setOpDlTmms(negTimeS);
 
     PSCH1.setKman(kman);
-    PSCH1.setIManThr(iManThr);
+    PSCH1.setOrDelays(pschOrZeroMinToUnblockS, pschOrOneReblockDelayS);
 
     times = std::make_shared<std::vector<double>>(parser->getTimeData());
 }
@@ -62,7 +63,7 @@ void PROT::imitateRP(int& timedat)
     const int idx = timedat;
     const double t = times->at(timedat);
 
-    PSCH1.step();
+    PSCH1.step(t);
 
     PIOC1.checkStr(idx, t);
     PIOC2.checkStr(idx, t);

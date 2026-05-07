@@ -8,6 +8,7 @@
 #include "LN/Fourier&RMS.h"
 #include "LN/CDC/CMV.h"
 #include <ParserComtrade.h>
+#include <string>
 #include <zmq.hpp>
 
 
@@ -23,7 +24,9 @@ public:
 
     void setSettings(double posStrVal, double posStrAng, double posTimeS,
                      double negStrVal, double negStrAng, double negTimeS,
-                     double kman, double iManThr,
+                     double kman,
+                     double pschOrZeroMinToUnblockS,
+                     double pschOrOneReblockDelayS,
                      std::shared_ptr<ParserComtrade> parser);
 
     void acceptDataFromMSQI(std::shared_ptr<CMV> positiveSeq,

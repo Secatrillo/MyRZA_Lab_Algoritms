@@ -22,7 +22,8 @@ void IED::setSettings(std::shared_ptr<Settings> settings)
     prot.setSettings(settings->getPosStrVal(), settings->getPosStrAng(), settings->getPosTimeS(),
                      settings->getNegStrVal(), settings->getNegStrAng(), settings->getNegTimeS(),
                      settings->getKman(),
-                     settings->getIManThr(),
+                     settings->getPschOrZeroMinToUnblockS(),
+                     settings->getPschOrOneReblockDelayS(),
                      settings->getParser());
     meas.setSettings(settings->getFourierMode(), settings->getDiscrit(), settings->getParser());
     context = settings->getContext();
@@ -118,25 +119,24 @@ IEDTelemetryFrame IED::buildTelemetryFrame(int sampleIndex) const
         frame.graphs.push_back(std::move(g));
     }
 
-    // --- PSCH: ток манипуляции и составляющие (аналоговые)
-    {
-        TelemetryGraphBlock g;
-        g.graph_name = "PSCH currents";
-        g.plot_style = "line";
-        g.lines.push_back({"i_pp", prot.PSCH1.ippLast});
-        g.lines.push_back({"i_op", prot.PSCH1.iopLast});
-        g.lines.push_back({"i_man", prot.PSCH1.iManLast});
-        g.lines.push_back({"i_man_thr", prot.PSCH1.iManThr});  // уставка (константа на графике)
-        frame.graphs.push_back(std::move(g));
-    }
+    // // --- PSCH: ток манипуляции и составляющие (аналоговые)
+    // {
+    //     TelemetryGraphBlock g;
+    //     g.graph_name = "PSCH currents";
+    //     g.plot_style = "line";
+    //     g.lines.push_back({"i_pp", prot.PSCH1.ippLast});
+    //     g.lines.push_back({"i_op", prot.PSCH1.iopLast});
+    //     g.lines.push_back({"i_man", prot.PSCH1.iManLast});
+    //     frame.graphs.push_back(std::move(g));
+    // }
 
     // --- PSCH: обмен по сокетам и блокировка (дискретные)
     {
         TelemetryGraphBlock g;
         g.graph_name = "PSCH link";
         g.plot_style = "step";
-        g.lines.push_back({"tx_to_remote", discrete(static_cast<double>(prot.PSCH1.lastTxByte))});
-        g.lines.push_back({"rx_from_remote", discrete(static_cast<double>(prot.PSCH1.lastRxByte))});
+        g.lines.push_back({"local_disc", discrete(static_cast<double>(prot.PSCH1.localDisc))});
+        g.lines.push_back({"remote_disc", discrete(static_cast<double>(prot.PSCH1.remoteDisc))});
         g.lines.push_back({"Blk", discrete(prot.PSCH1.Blk->general->getvalue())});
         frame.graphs.push_back(std::move(g));
     }
@@ -181,5 +181,8 @@ void IED::modelIEDWork(int& counter)
         ctrl.actOnSignal();
 
         sendTelemetrySample(i);
+
+        if (simTickBarrier)
+            simTickBarrier->arriveAndWait();
     }
 }
