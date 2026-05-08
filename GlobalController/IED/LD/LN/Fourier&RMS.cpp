@@ -28,19 +28,23 @@ void Fourier::unpackSampledValues(){
     masC->push_back(currentC->getInstMag());
 
     if(masA->size() == N){
-        std::shared_ptr<Vector> A = std::make_shared<Vector>("cVal", EnumFunctionalConstraints::MX, TriggerOption(true,false,true), this->getLNRef()); 
-        std::shared_ptr<Vector> B = std::make_shared<Vector>("cVal", EnumFunctionalConstraints::MX, TriggerOption(true,false,true), this->getLNRef());
-        std::shared_ptr<Vector> C = std::make_shared<Vector>("cVal", EnumFunctionalConstraints::MX, TriggerOption(true,false,true), this->getLNRef());
+        counter++;
+        if(counter == 10)
+        {
+            std::shared_ptr<Vector> A = std::make_shared<Vector>("cVal", EnumFunctionalConstraints::MX, TriggerOption(true,false,true), this->getLNRef()); 
+            std::shared_ptr<Vector> B = std::make_shared<Vector>("cVal", EnumFunctionalConstraints::MX, TriggerOption(true,false,true), this->getLNRef());
+            std::shared_ptr<Vector> C = std::make_shared<Vector>("cVal", EnumFunctionalConstraints::MX, TriggerOption(true,false,true), this->getLNRef());
 
 
-        calculateFourier(masA, A,    0, PhaseA);
-        calculateFourier(masB, B, -120, PhaseB);
-        calculateFourier(masC, C,  120, PhaseC);
+            calculateFourier(masA, A,    0, PhaseA);
+            calculateFourier(masB, B, -120, PhaseB);
+            calculateFourier(masC, C,  120, PhaseC);
 
-        fourierA->set_cVal(*A);
-        fourierB->set_cVal(*B);
-        fourierC->set_cVal(*C);
-
+            fourierA->set_cVal(*A);
+            fourierB->set_cVal(*B);
+            fourierC->set_cVal(*C);
+            counter = 0;
+        }
         masA->erase(masA->begin());
         masB->erase(masB->begin());
         masC->erase(masC->begin());

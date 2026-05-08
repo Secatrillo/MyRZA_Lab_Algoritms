@@ -22,6 +22,7 @@ public:
     std::shared_ptr<SPS> mode;
     int N = 80;
     double freq = 50;
+    int counter = 0;
     
     std::shared_ptr<std::vector<double>> masA;
     std::shared_ptr<std::vector<double>> masB;

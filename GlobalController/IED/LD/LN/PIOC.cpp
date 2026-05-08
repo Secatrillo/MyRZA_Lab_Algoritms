@@ -51,6 +51,12 @@ double wrapAngle(double a)
     return a;
 }
 
+static std::complex<double> rotateToSyncFrame(double mag, double ang, double tSeconds)
+{
+    const double w = 2.0 * M_PI * PIOC::kNominalFreqHz;
+    return std::polar(mag, ang - w * tSeconds);
+}
+
 
 
 void PIOC::checkStr(int sampleIndex, double timedat)
@@ -60,11 +66,30 @@ void PIOC::checkStr(int sampleIndex, double timedat)
     const double curMag = CurrentVec->cVal->getMag();
     const double curAng = CurrentVec->cVal->getAng();
 
+    if (!curValid) {
+        curValid = true;
+        lastCurMag = curMag;
+        lastCurAng = curAng;
+        tCur = timedat;
+    } else {
+        const bool magChanged = std::abs(curMag - lastCurMag) > kEpsMag;
+        const bool angChanged = std::abs(wrapAngle(curAng - lastCurAng)) > kEpsAng;
+        if (magChanged || angChanged) {
+            lastCurMag = curMag;
+            lastCurAng = curAng;
+            tCur = timedat;
+        }
+    }
+
     
     if (sampleIndex < kWarmupSamples) {
         PrevVec->cVal->setMag(curMag);
         PrevVec->cVal->setAng(curAng);
         prevValid = true;
+        tPrev = tCur;
+        Str->general->setvalue(false);
+        Op->general->setvalue(false);
+        wasBlocked = false;
         return;
     }
 
@@ -73,18 +98,22 @@ void PIOC::checkStr(int sampleIndex, double timedat)
         PrevVec->cVal->setMag(curMag);
         PrevVec->cVal->setAng(curAng);
         prevValid = true;
+        tPrev = tCur;
+        Str->general->setvalue(false);
+        Op->general->setvalue(false);
+        wasBlocked = false;
         return;
     }
 
     const double prevMag = PrevVec->cVal->getMag();
     const double prevAng = PrevVec->cVal->getAng();
 
-    const std::complex<double> cur = std::polar(curMag, curAng);
-    const std::complex<double> prev = std::polar(prevMag, prevAng);
+    const std::complex<double> cur = rotateToSyncFrame(curMag, curAng, tCur);
+    const std::complex<double> prev = rotateToSyncFrame(prevMag, prevAng, tPrev);
     const std::complex<double> diff = cur - prev;
 
     const double dMag = std::abs(diff);
-    const double dPhi = std::abs(wrapAngle(curAng - prevAng));
+    const double dPhi = std::abs(wrapAngle(std::arg(cur) - std::arg(prev)));
 
     const double thrMag = StrVal->setMag->f->getvalue();
     const double thrAng = StrAng->setMag->f->getvalue();
@@ -100,31 +129,38 @@ void PIOC::checkStr(int sampleIndex, double timedat)
         }
         /* PrevVec сохраняем — измеряем длительность относительно начала скачка. */
     } else {
-        /* Гистерезис сброса пуска: при «дребезге» около уставки Str не гаснет одним тактом,
-           иначе OpDlTmms не успевает набраться (типично для второго конца линии / шумной осциллограммы). */
-        const bool magCalmed = (dMag < thrMag * 0.4);
-        const bool angCalmed = (dPhi < thrAng * 0.75) || (dMag < thrMag * 0.05);
-        if (!Str->general->getvalue()) {
-            PrevVec->cVal->setMag(curMag);
-            PrevVec->cVal->setAng(curAng);
-        } else if (magCalmed && angCalmed) {
-            PrevVec->cVal->setMag(curMag);
-            PrevVec->cVal->setAng(curAng);
-            Str->general->setvalue(false);
-            Op->general->setvalue(false);
-        }
+        /* Нет превышения: сброс пуска/срабатывания и обновление базы. */
+        PrevVec->cVal->setMag(curMag);
+        PrevVec->cVal->setAng(curAng);
+        tPrev = tCur;
+        Str->general->setvalue(false);
+        Op->general->setvalue(false);
+        wasBlocked = false;
     }
 }
 
 void PIOC::checkTimeStr(int sampleIndex, double timedat)
 {
-    if (sampleIndex < kWarmupSamples) return;
-    if (!Str->general->getvalue()) return;
+    const bool blocked = BlkDPP && BlkDPP->general->getvalue();
+    if (sampleIndex < kWarmupSamples) {
+        wasBlocked = blocked;
+        return;
+    }
+    if (!Str->general->getvalue()) {
+        wasBlocked = blocked;
+        return;
+    }
+    /* При снятии блокировки во время пуска выдержка начинается заново. */
+    if (wasBlocked && !blocked) {
+        tStr = timedat;
+        wasBlocked = false;
+        return;
+    }
+    wasBlocked = blocked;
+    if (blocked) return;
 
     const double elapsedMs = (timedat - tStr) * 1e3;
     const int32_t delayMs = OpDlTmms->setVal->getvalue();
-
-    const bool blocked = BlkDPP && BlkDPP->general->getvalue();
 
     if (delayMs > 0 && elapsedMs >= delayMs && !blocked) {
         Op->general->setvalue(true);

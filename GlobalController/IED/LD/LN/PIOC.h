@@ -13,11 +13,13 @@
  * Принимает CMV (последовательность от MSQI) как CurrentVec; на каждом такте
  * считает Δ = CurrentVec − PrevVec в комплексной форме. Если |Δ| превышает StrVal
  * или |∠Δ| превышает StrAng — пуск (Str) с фиксацией момента tStr; PrevVec при
- * этом НЕ обновляется (чтобы измерять длительность скачка относительно базы).
- * Если уставки не превышены — PrevVec ← CurrentVec; при уже выставленном Str
- * сброс выполняется с гистерезисом (см. PIOC.cpp), чтобы не срывать выдержку OpDlTmms.
+ * этом НЕ обновляется (заморозка базы).
  *
- * При истечении выдержки OpDlTmms и BlkDPP=false выставляется Op.
+ * Если превышения уставки нет — пуск и срабатывание сбрасываются (Str=0, Op=0),
+ * а PrevVec обновляется текущим значением.
+ *
+ * При истечении выдержки OpDlTmms и BlkDPP=false выставляется Op. Если блокировка
+ * снимается во время пуска — выдержка начинается заново от момента снятия блокировки.
  */
 class PIOC : public GenLogicalNodeClass
 {
@@ -35,6 +37,12 @@ public:
 
     double tStr = 0.0;
     bool prevValid = false;
+    bool wasBlocked = false;
+    double tPrev = 0.0;
+    bool curValid = false;
+    double lastCurMag = 0.0;
+    double lastCurAng = 0.0;
+    double tCur = 0.0;
 
     PIOC(std::string LogicalNodeName_, std::string LogicalDeviceRef_);
 
@@ -49,5 +57,8 @@ public:
     void checkStr(int sampleIndex, double timedat);
     void checkTimeStr(int sampleIndex, double timedat);
 
-    static constexpr int kWarmupSamples = 80;
+    static constexpr int kWarmupSamples = 300;
+    static constexpr double kNominalFreqHz = 50.0;
+    static constexpr double kEpsMag = 1e-9;
+    static constexpr double kEpsAng = 1e-9;
 };

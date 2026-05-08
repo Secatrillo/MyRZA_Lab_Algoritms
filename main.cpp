@@ -4,10 +4,10 @@
 
 #include <future>
 
-#define POS_STR_VAL    50.0   // уставка по приращению модуля PositiveSeq, А
+#define POS_STR_VAL    200.0   // уставка по приращению модуля PositiveSeq, А
 #define POS_STR_ANG    0.5     // уставка по приращению угла PositiveSeq, рад
 #define POS_TIME_S     0.6    // выдержка PIOC1, c
-#define NEG_STR_VAL    50.0    // уставка по приращению модуля NegativeSeq, А
+#define NEG_STR_VAL    70.0    // уставка по приращению модуля NegativeSeq, А
 #define NEG_STR_ANG    0.5     // уставка по приращению угла NegativeSeq, рад
 #define NEG_TIME_S     0.25    // выдержка PIOC2, c
 #define KMAN           4.0     // коэффициент в формуле iман

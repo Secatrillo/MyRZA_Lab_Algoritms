@@ -49,7 +49,7 @@ MIN_DRAW_INTERVAL = 0.05
 IDLE_CYCLES_FOR_DONE = 80
 RELIM_INTERVAL_S = 0.35
 # Сколько точек максимум отдавать в Line2D на один ряд (полные данные в списках).
-MAX_DISPLAY_POINTS_PER_LINE = 500
+MAX_DISPLAY_POINTS_PER_LINE = 600
 
 TIME_PAN_FRACTION = 0.1
 TIME_ZOOM_FACTOR = 1.25
