@@ -14,7 +14,3 @@
 #include <future>
 
 namespace py = pybind11;
-
-void run_python_script(intptr_t ctx_address,
-                       const std::string& script_path,
-                       std::promise<void>* telemetry_pull_ready = nullptr);

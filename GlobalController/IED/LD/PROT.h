@@ -2,41 +2,40 @@
 
 #include "LN/CDC/WYE.h"
 #include "GenLogicalDeviceClass.h"
-#include "LN/PIOC.h"
-#include "LN/PSCH.h"
+#include "LN/PDIS.h"
+#include <IEDSettings.h>
 #include "LN/PTRC.h"
-#include "LN/Fourier&RMS.h"
+#include "LN/RDIS.h"
+#include "LN/CDC/ACT.h"
 #include "LN/CDC/CMV.h"
 #include <ParserComtrade.h>
+#include <memory>
 #include <string>
-#include <zmq.hpp>
-
 
 class PROT : public GenLogicalDeviceClass
 {
 public:
-    PIOC PIOC1;   // от PositiveSeq
-    PIOC PIOC2;   // от NegativeSeq
-    PSCH PSCH1;
     PTRC PTRC1;
+
+    RDIS RDIS_P;
+    RDIS RDIS_N;
+    std::shared_ptr<ACT> BlkSvgCombined;
+    PDIS PDIS1;
+    PDIS PDIS2;
+    PDIS PDIS3;
 
     PROT(std::string LDName_);
 
-    void setSettings(double posStrVal, double posStrAng, double posTimeS,
-                     double negStrVal, double negStrAng, double negTimeS,
-                     double kman,
-                     double pschOrZeroMinToUnblockS,
-                     double pschOrOneReblockDelayS,
-                     std::shared_ptr<ParserComtrade> parser);
+    void setSettings(double posStrVal, double posStrAng,
+                     double negStrVal, double negStrAng,
+                     std::shared_ptr<ParserComtrade> parser,
+                     const PdisPickupSettings& pdis1,
+                     const PdisPickupSettings& pdis2,
+                     const PdisPickupSettings& pdis3);
 
-    void acceptDataFromMSQI(std::shared_ptr<CMV> positiveSeq,
-                            std::shared_ptr<CMV> negativeSeq);
+    void acceptDataFromMSQI(std::shared_ptr<CMV> positiveSeq, std::shared_ptr<CMV> negativeSeq);
 
-    void linkFourierToPSCH(Fourier& f);
-    void linkPSCHToPIOC();
-
-    void bindPSCHLocal(zmq::context_t& ctx, const std::string& selfName);
-    void connectPSCHRemote(zmq::context_t& ctx, const std::string& remoteName);
+    void linkDistanceProtection(std::shared_ptr<WYE> curZ);
 
     void imitateRP(int& timedat);
 

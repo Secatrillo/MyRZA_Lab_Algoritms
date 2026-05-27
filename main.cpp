@@ -1,101 +1,121 @@
 #include "GlobalController/IED/IED.h"
-#include "GlobalController/IED/IedStepBarrier.h"
 #include "include.h"
 
+#include <cmath>
 #include <future>
 
-#define POS_STR_VAL    200.0   // уставка по приращению модуля PositiveSeq, А
-#define POS_STR_ANG    0.5     // уставка по приращению угла PositiveSeq, рад
-#define POS_TIME_S     0.6    // выдержка PIOC1, c
-#define NEG_STR_VAL    70.0    // уставка по приращению модуля NegativeSeq, А
-#define NEG_STR_ANG    0.5     // уставка по приращению угла NegativeSeq, рад
-#define NEG_TIME_S     0.25    // выдержка PIOC2, c
-#define KMAN           4.0     // коэффициент в формуле iман
-/** Мин. время подряд, когда (local|remote) по битам == 0 (оба дискрета 0), чтобы снять Blk. */
-#define PSCH_OR_ZERO_MIN_TO_UNBLOCK_S 0.0005
-/** Выдержка при непрерывном «ИЛИ==1» перед восстановлением Blk. */
-#define PSCH_OR_ONE_REBLOCK_DELAY_S   0.015
+#define POS_STR_VAL    200.0
+#define POS_STR_ANG    0.5
+#define NEG_STR_VAL    70.0
+#define NEG_STR_ANG    0.5
 #define DISCRETIZATION 4000
 #define FOURIER_MODE   true
 
+/* PDIS1 — уставки зоны срабатывания (OpDlTmms в с; StrValFi в градусах → рад в коде). */
+#define PDIS1_OP_DL_TMMS      0.5
+#define PDIS1_STR_VAL_R       10
+#define PDIS1_STR_VAL_X       10
+#define PDIS1_STR_VAL_FI_DEG  0.0
+#define PDIS1_STR_VAL_OFFSET  0.0
+#define PDIS1_STR_VAL_HYST    1.05
+
+/* PDIS2 */
+#define PDIS2_OP_DL_TMMS      0.8
+#define PDIS2_STR_VAL_R       50
+#define PDIS2_STR_VAL_X       20
+#define PDIS2_STR_VAL_FI_DEG  45
+#define PDIS2_STR_VAL_OFFSET  45
+#define PDIS2_STR_VAL_HYST    1.05
+
+/* PDIS3 */
+#define PDIS3_OP_DL_TMMS      1.0
+#define PDIS3_STR_VAL_R       75
+#define PDIS3_STR_VAL_X       18
+#define PDIS3_STR_VAL_FI_DEG  55
+#define PDIS3_STR_VAL_OFFSET  75
+#define PDIS3_STR_VAL_HYST    1.05
+
+static std::pair<std::string, std::string> dprotPair(const std::string& stem)
+{
+    return {"DProtComt/" + stem + ".cfg", "DProtComt/" + stem + ".dat"};
+}
 
 int main(int argc, char* argv[])
 {
-    std::pair<std::string, std::string> comtrade1, comtrade2;
+    std::string stemCurrent = "K3_Q4-BCG";
+    std::string stemVoltage = "K3U_Q4-BCG";
 
-    if (argc < 3) {
-        comtrade1.first  = "End_line/K3_1.cfg";
-        comtrade1.second = "End_line/K3_1.dat";
-        comtrade2.first  = "Start_line/K6_1.cfg";
-        comtrade2.second = "Start_line/K6_1.dat";
-    } else {
-        comtrade1.first  = std::string("End_line/")   + argv[1] + ".cfg";
-        comtrade1.second = std::string("End_line/")   + argv[1] + ".dat";
-        comtrade2.first  = std::string("Start_line/") + argv[2] + ".cfg";
-        comtrade2.second = std::string("Start_line/") + argv[2] + ".dat";
+    if (argc >= 3) {
+        stemCurrent = argv[1];
+        stemVoltage = argv[2];
     }
 
-    const std::string name1 = "DPP_1";
-    const std::string name2 = "DPP_2";
-
-    auto ied1 = std::make_shared<IED>(name1);
-    auto ied2 = std::make_shared<IED>(name2);
+    const std::string iedName = "DPP_1";
+    IED ied(iedName);
 
     try {
-        auto parser1 = std::make_shared<ParserComtrade>(comtrade1);
-        auto parser2 = std::make_shared<ParserComtrade>(comtrade2);
+        auto parserCurrent = std::make_shared<ParserComtrade>(dprotPair(stemCurrent));
+        auto parserVoltage = std::make_shared<ParserComtrade>(dprotPair(stemVoltage));
 
-        int times = parser1->getTimeDataSize();
-        if (times != parser2->getTimeDataSize()) {
-            std::__throw_length_error("Длины выборок, записанных внутри переданных файлов, расходятся");
+        int times = parserCurrent->getTimeDataSize();
+        if (times != parserVoltage->getTimeDataSize()) {
+            std::__throw_length_error("Длины выборок COMTRADE токов и напряжений должны совпадать");
         }
 
         auto context = std::make_shared<zmq::context_t>();
 
-        ied1->setSettings(std::make_shared<Settings>(
-            POS_STR_VAL, POS_STR_ANG, POS_TIME_S,
-            NEG_STR_VAL, NEG_STR_ANG, NEG_TIME_S,
-            KMAN, PSCH_OR_ZERO_MIN_TO_UNBLOCK_S, PSCH_OR_ONE_REBLOCK_DELAY_S, FOURIER_MODE, DISCRETIZATION,
-            parser1, context, name2));
-        ied2->setSettings(std::make_shared<Settings>(
-            POS_STR_VAL, POS_STR_ANG, POS_TIME_S,
-            NEG_STR_VAL, NEG_STR_ANG, NEG_TIME_S,
-            KMAN, PSCH_OR_ZERO_MIN_TO_UNBLOCK_S, PSCH_OR_ONE_REBLOCK_DELAY_S, FOURIER_MODE, DISCRETIZATION,
-            parser2, context, name1));
+        const PdisPickupSettings pdis1{PDIS1_OP_DL_TMMS,
+                                       PDIS1_STR_VAL_R,
+                                       PDIS1_STR_VAL_X,
+                                       (PDIS1_STR_VAL_FI_DEG) * (M_PI / 180.0),
+                                       PDIS1_STR_VAL_OFFSET,
+                                       PDIS1_STR_VAL_HYST};
+        const PdisPickupSettings pdis2{PDIS2_OP_DL_TMMS,
+                                       PDIS2_STR_VAL_R,
+                                       PDIS2_STR_VAL_X,
+                                       (PDIS2_STR_VAL_FI_DEG) * (M_PI / 180.0),
+                                       PDIS2_STR_VAL_OFFSET,
+                                       PDIS2_STR_VAL_HYST};
+        const PdisPickupSettings pdis3{PDIS3_OP_DL_TMMS,
+                                       PDIS3_STR_VAL_R,
+                                       PDIS3_STR_VAL_X,
+                                       (PDIS3_STR_VAL_FI_DEG) * (M_PI / 180.0),
+                                       PDIS3_STR_VAL_OFFSET,
+                                       PDIS3_STR_VAL_HYST};
+
+        ied.setSettings(std::make_shared<Settings>(
+            POS_STR_VAL, POS_STR_ANG,
+            NEG_STR_VAL, NEG_STR_ANG,
+            FOURIER_MODE, DISCRETIZATION,
+            parserCurrent, parserVoltage, context,
+            pdis1, pdis2, pdis3));
 
         py::scoped_interpreter guard{};
 
         intptr_t ctx_ptr = reinterpret_cast<intptr_t>(static_cast<void*>(context->operator void*()));
 
-        /* PULL on telemetry must bind before IED PUSH connects (inproc ordering). */
         std::promise<void> telemetry_pull_bound;
         std::future<void> telemetry_pull_bound_f = telemetry_pull_bound.get_future();
 
-        std::vector<std::thread> protThreads;
-        {
-            py::gil_scoped_release release;
-
-            protThreads.emplace_back(run_python_script, ctx_ptr, "Monitoring.py", &telemetry_pull_bound);
+        // Matplotlib/Qt ожидают GUI в потоке, где создан интерпретатор — запускаем Monitoring здесь,
+        // симуляцию C++ — в фоне. gil_scoped_release здесь нельзя: поток не держал GIL (PyThreadState NULL).
+        std::thread simThread([&]() {
             telemetry_pull_bound_f.wait();
+            ied.IEDInitDataTransfer();
+            ied.modelIEDWork(times);
+        });
 
-            
-            
-
-            auto iedSimBarrier = std::make_shared<IedStepBarrier>(2u);
-            ied1->setSimTickBarrier(iedSimBarrier);
-            ied2->setSimTickBarrier(iedSimBarrier);
-
-            for (auto& ied : {ied1, ied2}) {
-                ied->bindPSCHLocal();
-                ied->connectPSCHRemote();
-                ied->IEDInitDataTransfer();
-                protThreads.emplace_back(&IED::modelIEDWork, ied.get(), std::ref(times));
-            }
-
-            for (auto& thread : protThreads) {
-                thread.join();
-            }
+        {
+            py::gil_scoped_acquire gil;
+            py::globals()["zmq_context_address"] = ctx_ptr;
+            py::globals()["notify_telemetry_pull_bound"] = py::cpp_function([&telemetry_pull_bound]() {
+                static std::once_flag once;
+                std::call_once(once, [&] { telemetry_pull_bound.set_value(); });
+            });
+            py::eval_file("Monitoring.py");
         }
+
+        simThread.join();
 
     } catch (const std::invalid_argument& e) {
         std::cerr << "Ошибка преобразования: " << e.what() << std::endl;
@@ -104,17 +124,4 @@ int main(int argc, char* argv[])
     }
 
     return 0;
-}
-
-void run_python_script(intptr_t ctx_address, const std::string& script_path, std::promise<void>* telemetry_pull_ready)
-{
-    py::gil_scoped_acquire gil;
-    py::globals()["zmq_context_address"] = ctx_address;
-    if (telemetry_pull_ready) {
-        py::globals()["notify_telemetry_pull_bound"] = py::cpp_function([telemetry_pull_ready]() {
-            static std::once_flag once;
-            std::call_once(once, [&] { telemetry_pull_ready->set_value(); });
-        });
-    }
-    py::eval_file(script_path);
 }

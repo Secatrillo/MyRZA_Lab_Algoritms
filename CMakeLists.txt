@@ -62,5 +62,8 @@ file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/Start_line"
 file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/End_line" 
      DESTINATION "${BIN_DIR}")
 
+file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/DProtComt"
+     DESTINATION "${BIN_DIR}")
+
 file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/utils/Monitoring.py" 
      DESTINATION "${BIN_DIR}")

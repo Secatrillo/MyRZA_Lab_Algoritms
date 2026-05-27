@@ -64,7 +64,7 @@ void Fourier::calculateFourier(std::shared_ptr<std::vector<double>> mas, std::sh
         Fy_ *= 2.0/N;
         Fx[phase] = Fx_;
         Fy[phase] = Fy_;
-        vec->setMag(sqrt(Fx_*Fx_ + Fy_*Fy_));
+        vec->setMag(sqrt((Fx_*Fx_ + Fy_*Fy_)/2));
         vec->setAng(atan2(Fy_,Fx_));
     } else {
         double mag = 0;
